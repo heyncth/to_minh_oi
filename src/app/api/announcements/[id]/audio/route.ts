@@ -1,21 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { bulletinSpeechText, DEFAULT_VOICE, synthesizeMp3 } from "@/lib/edge-tts";
 
 type Params = { params: Promise<{ id: string }> };
 
-async function requireAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return { supabase, user };
-}
-
 export async function POST(_req: Request, { params }: Params) {
   const { id } = await params;
-  const { supabase, user } = await requireAdmin();
-  if (!user) {
+  const { user, supabase } = await createAdminClient();
+  if (!user || !supabase) {
     return NextResponse.json(
       { error: { code: "unauthorized", message: "Phiên đăng nhập hết hạn." } },
       { status: 401 },
@@ -45,18 +37,16 @@ export async function POST(_req: Request, { params }: Params) {
 
   try {
     const { audio, duration, bytes } = await synthesizeMp3(text, DEFAULT_VOICE);
-    const path = `${id}.mp3`;
-    const { error: upErr } = await supabase.storage
-      .from("announcements")
-      .upload(`audio/${path}`, audio, {
-        contentType: "audio/mpeg",
-        upsert: true,
-      });
+    const path = `audio/${id}.mp3`;
+    const { error: upErr } = await supabase.storage.from("announcements").upload(path, audio, {
+      contentType: "audio/mpeg",
+      upsert: true,
+    });
     if (upErr) throw new Error(upErr.message);
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from("announcements").getPublicUrl(`audio/${path}`);
+    } = supabase.storage.from("announcements").getPublicUrl(path);
 
     const { error: updErr } = await supabase
       .from("announcements")
@@ -72,7 +62,7 @@ export async function POST(_req: Request, { params }: Params) {
         error: {
           code: "upstream_error",
           message:
-            "Chưa tạo được giọng đọc dự phòng — nút Nghe sẽ dùng đọc máy nếu thiết bị hỗ trợ.",
+            "Chưa tạo được giọng đọc dự phòng — người dùng iPhone có thể chỉ thấy nút đọc máy (Web Speech).",
           detail: msg,
         },
       },
