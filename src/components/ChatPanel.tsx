@@ -352,7 +352,7 @@ export function ChatPanel() {
           void send(input);
         }}
       >
-        {micSupported && (
+        {hydrated && micSupported && (
           <button
             type="button"
             className="chat__mic"
