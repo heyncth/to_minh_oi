@@ -6,6 +6,28 @@ export const metadata: Metadata = {
   title: "Tổ Mình Ơi",
   description: "Bảng tin tổ dân phố – Trợ lý hỏi đáp 24/7",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    siteName: "Tổ Mình Ơi",
+    title: "Tổ Mình Ơi",
+    description: "Bảng tin tổ dân phố – Trợ lý hỏi đáp 24/7",
+    images: [{ url: "/og.jpg", width: 1200, height: 670, alt: "Tổ Mình Ơi – Bảng tin tổ dân phố, Trợ lý hỏi đáp 24/7" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tổ Mình Ơi",
+    description: "Bảng tin tổ dân phố – Trợ lý hỏi đáp 24/7",
+    images: ["/og.jpg"],
+  },
   appleWebApp: {
     capable: true,
     title: "Tổ Mình Ơi",

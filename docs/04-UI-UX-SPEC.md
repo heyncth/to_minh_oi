@@ -347,6 +347,18 @@ Focus rings: 2px solid `--accent` + 2px offset, always visible on keyboard.
 | Thuyết minh (docs only) | Gắn kết từng hộ dân – Vững bước Cẩm Lệ số |
 | Chat empty | Cần hỏi thủ tục hay kiểm tra tin nhắn lạ, cứ nhắn Tổ Mình Ơi! |
 
+### 10.1 Brand assets (14/11/2026)
+
+| Asset | Path | Notes |
+|-------|------|-------|
+| PWA icon source | `public/icons/icon-{192,512}.png` | From `icon (2).jpg` (house + chat + waveform, civic blue) |
+| Maskable | `public/icons/icon-512-maskable.png` | Inset ~10% on `#0b5cab` |
+| Apple touch | `public/icons/apple-touch-icon.png` | 180×180 |
+| OG / share | `public/og.jpg` | 1200×670 — wired in `layout.tsx` `openGraph` + `twitter` |
+| A5 QR standee (print template) | `public/print/a5-standee-qr.jpg` | 896×1200 — teal header + amber footer + white QR card; **template for A4 poster / other print** |
+
+Print template language: dark teal bar + amber band + cream ground + white rounded QR card + double-line corner frame. Slogan under QR stays locked.
+
 ---
 
 ## 11. Out of scope for UI
