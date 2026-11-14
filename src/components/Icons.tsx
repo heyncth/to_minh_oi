@@ -91,3 +91,13 @@ export function IconRadioOff(props: IconProps) {
     </svg>
   );
 }
+
+/** Share to Zalo / Messenger / download */
+export function IconShare(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3v12M8 7l4-4 4 4" />
+      <path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6" />
+    </svg>
+  );
+}

@@ -44,6 +44,7 @@
 | GET | `/api/announcements` | Public | List published announcements |
 | POST | `/api/announcements` | Admin | Create (optional AI draft fields already filled) |
 | GET | `/api/announcements/:id` | Public | One published announcement |
+| GET | `/api/announcements/:id/card` | Public | Share card PNG (OG preview + image download) |
 | PATCH | `/api/announcements/:id` | Admin | Update / publish / hide / edit |
 | DELETE | `/api/announcements/:id` | Admin | Delete |
 | POST | `/api/announcements/:id/audio` | Admin | Generate Edge TTS MP3 → `audio_url` |
@@ -287,6 +288,16 @@ Response: updated row.
 
 All admin mutations without valid session → `401 unauthorized`.  
 Client redirects to `/admin/login`.
+
+### 5.6 `GET /api/announcements/:id/card`
+
+Share card image (ImageResponse + QR → `/bang-tin/:id`). Serves both OG link preview and the "Chia sẻ" download from one URL.
+
+- Query `variant`: `og` (default, 1200×630 landscape) · `share` (896×1200 portrait, standee-style).
+- Public: 200 `image/png`; 404 `{error:{code:"not_found"}}` if not published.
+- QR encodes absolute `/bang-tin/:id` URL (site base from `NEXT_PUBLIC_SITE_URL` / Vercel prod URL).
+- Colors = design tokens (accent `#0b5cab` ladder); fonts Be Vietnam Pro TTF.
+- Cache: `public, max-age=3600, s-maxage=86400`.
 
 ---
 

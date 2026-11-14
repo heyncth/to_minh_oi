@@ -147,12 +147,14 @@ No bottom nav (or bottom nav hidden). List + editor as main pane.
 │ Thời gian & địa điểm: …                │
 │ Người dân cần làm gì: …                │
 │                                        │
-│ [▶ Nghe thông báo]  [Xem nguyên văn ›] │  ← primary accent button + ghost
+│ [▶ Nghe thông báo] [Chia sẻ] [Xem nguyên văn ›] │  ← primary + ghost buttons
 └────────────────────────────────────────┘
 ```
 
 - Urgent card: optional 1.5px left border `--negative` **or** pill only (choose pill; avoid double signal clutter).
 - Listen button: filled `--accent`, white text, min-height 48. States: idle / playing (“Dừng”) / paused (“Tiếp tục”) / hidden.
+- Share button: ghost, label **“Chia sẻ”**, icon share SVG (no emoji). Tap → native share sheet with card PNG (`navigator.share({files})`), fallback download `tin-to-minh-oi.png`. Card URL: `GET /api/announcements/:id/card?variant=share`.
+- Detail page `/bang-tin/:id` (deep link target for QR/Zalo): back link **“← Xem tất cả thông báo của tổ”** above NoticeCard → `/`.
 
 ### 4.2 Trợ lý (`/tro-ly`)
 
@@ -356,6 +358,7 @@ Focus rings: 2px solid `--accent` + 2px offset, always visible on keyboard.
 | Apple touch | `public/icons/apple-touch-icon.png` | 180×180 |
 | OG / share | `public/og.jpg` | 1200×670 — wired in `layout.tsx` `openGraph` + `twitter` |
 | A5 QR standee (print template) | `public/print/a5-standee-qr.jpg` | 896×1200 — teal header + amber footer + white QR card; **template for A4 poster / other print** |
+| Share card (dynamic) | `GET /api/announcements/:id/card` | `variant=og` 1200×630 (Zalo/Messenger preview) · `variant=share` 896×1200 (photo share). Civic blue ladder, Be Vietnam Pro (`fonts/`), QR → `/bang-tin/:id` |
 
 Print template language: dark teal bar + amber band + cream ground + white rounded QR card + double-line corner frame. Slogan under QR stays locked.
 
