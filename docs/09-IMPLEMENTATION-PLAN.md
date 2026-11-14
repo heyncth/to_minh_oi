@@ -106,14 +106,14 @@ Admin (P3) can parallel P4 after P0.
 
 | # | Task | Done when |
 |---|------|-----------|
-| 5.1 | Seed 6 announcements + categories + urgent flags | PRD §7 |
-| 5.2 | Lighthouse mobile: FCP < 2 s | Screenshot |
-| 5.3 | Device matrix: Android Chrome, iOS Safari, desktop | Checklist green |
-| 5.4 | Vercel production deploy + custom QR URL | QR scans |
-| 5.5 | 90 s demo video (F1→F2→F3) | File ready |
-| 5.6 | Verify SAMPLE procedures with One-door (or annotate) | Honesty box checked |
-| 5.7 | Thuyết minh + poster using locked slogans | Print ready |
-| 5.8 | Final `lint` / `typecheck` / no key leak grep | CI/local green |
+| 5.1 | Seed 6 announcements + categories + urgent flags | PRD §7 — **done 14/11** (richer SAMPLE + 6 MP3) |
+| 5.2 | Lighthouse mobile: FCP < 2 s | Screenshot — **local pass 14/11** (`docs/evidence/lighthouse-2026-11-14.md`, FCP 0.8 s); re-run on prod after 5.4 |
+| 5.3 | Device matrix: Android Chrome, iOS Safari, desktop | Checklist green — **needs human devices** |
+| 5.4 | Vercel production deploy + custom QR URL | QR scans — **needs Vercel login** |
+| 5.5 | 90 s demo video (F1→F2→F3) | File ready — **needs human recording** |
+| 5.6 | Verify SAMPLE procedures with One-door (or annotate) | Honesty box checked — **needs ward** |
+| 5.7 | Thuyết minh + poster using locked slogans | Print ready — **needs human/print** |
+| 5.8 | Final `lint` / `typecheck` / no key leak grep | CI/local green — **local green 14/11** |
 
 ---
 
