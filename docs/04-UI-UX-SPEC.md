@@ -351,8 +351,8 @@ Focus rings: 2px solid `--accent` + 2px offset, always visible on keyboard.
 
 | Asset | Path | Notes |
 |-------|------|-------|
-| PWA icon source | `public/icons/icon-{192,512}.png` | From `icon (2).jpg` (house + chat + waveform, civic blue) |
-| Maskable | `public/icons/icon-512-maskable.png` | Inset ~10% on `#0b5cab` |
+| PWA icon source | `public/icons/icon-{192,512}.png` | From `Mobile_app_icon_design_cccd9e0f_2K.jpg` (house + chat + waveform, civic blue); white border flood-filled to icon blue |
+| Maskable | `public/icons/icon-512-maskable.png` | Glyph inset ~10% on icon blue |
 | Apple touch | `public/icons/apple-touch-icon.png` | 180×180 |
 | OG / share | `public/og.jpg` | 1200×670 — wired in `layout.tsx` `openGraph` + `twitter` |
 | A5 QR standee (print template) | `public/print/a5-standee-qr.jpg` | 896×1200 — teal header + amber footer + white QR card; **template for A4 poster / other print** |
