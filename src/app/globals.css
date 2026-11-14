@@ -253,6 +253,9 @@ select {
 .bottom-nav__icon {
   font-size: calc(20px * var(--font-base));
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Cards / buttons shared */
@@ -448,7 +451,7 @@ select {
   }
 }
 
-/* Chat (Trợily) */
+/* Chat (Trợ lý) */
 .chat {
   display: flex;
   flex-direction: column;

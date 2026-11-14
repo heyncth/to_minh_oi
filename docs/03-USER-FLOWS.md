@@ -12,7 +12,7 @@ flowchart LR
   QR[QR / URL] --> Home[Bảng tin /]
   Home --> Listen[Nghe thông báo]
   Home --> Nav[Bottom nav]
-  Nav --> Chat[Trợily /tro-ly]
+  Nav --> Chat[Trợ lý /tro-ly]
   Chat --> Rag[Hỏi thủ tục]
   Chat --> Scam[Kiểm tra tin lạ]
   Home --> AdminGate[Admin login /admin/login]
@@ -63,7 +63,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant R as Resident
-  participant C as Trợily UI
+  participant C as Trợ lý UI
   participant API as POST /api/chat
   participant E as Embedding+RPC
   participant G as Gemini
@@ -98,7 +98,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant R as Resident/Judge
-  participant C as Trợily UI
+  participant C as Trợ lý UI
   participant API as POST /api/chat
   participant G as Gemini
 

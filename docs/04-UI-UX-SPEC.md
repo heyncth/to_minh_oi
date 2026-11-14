@@ -102,7 +102,7 @@ Shadow only on: bottom sheet, modal, install banner floating.
 │                             │
 ├─────────────────────────────┤
 │ Bottom nav 64px             │
-│  [📰 Bảng tin] [💬 Trợily] │  ← 2 tabs only
+│  [SVG bulletin] Bảng tin · [SVG chat] Trợ lý │  ← 2 tabs only
 └─────────────────────────────┘
 ```
 
@@ -154,7 +154,7 @@ No bottom nav (or bottom nav hidden). List + editor as main pane.
 - Urgent card: optional 1.5px left border `--negative` **or** pill only (choose pill; avoid double signal clutter).
 - Listen button: filled `--accent`, white text, min-height 48. States: idle / playing (“Dừng”) / paused (“Tiếp tục”) / hidden.
 
-### 4.2 Trợily (`/tro-ly`)
+### 4.2 Trợ lý (`/tro-ly`)
 
 **States:** empty · thinking (3-dot) · streaming/answer · error · guardrail.
 
@@ -180,7 +180,7 @@ Section labels: 14–15px `--muted` (not slogans). Chips: `--surface` + border, 
 
 ```text
 ┌──────────────────────────────────────────┐
-│ [🎤] [ Nhập câu hỏi hoặc dán tin nhắn… ] [Gửi] │
+│ [mic SVG] [ Nhập câu hỏi hoặc dán tin nhắn… ] [Gửi] │
 └──────────────────────────────────────────┘
 ```
 
@@ -197,7 +197,7 @@ Section labels: 14–15px `--muted` (not slogans). Chips: `--surface` + border, 
 **Scam result card** (inside assistant turn):
 
 ```text
-┌─ 🔴 NGUY HIỂM – DẤU HIỆU LỪA ĐẢO CAO ─┐  ← header bar: level color solid, white text
+┌─ ● NGUY HIỂM – DẤU HIỆU LỪA ĐẢO CAO ─┐  ← header bar: level color solid, white text
 │ • Lý do 1…                              │
 │ • Lý do 2…                              │
 │ • Lý do 3…                              │
@@ -210,6 +210,8 @@ Section labels: 14–15px `--muted` (not slogans). Chips: `--surface` + border, 
 | safe | `--positive` | An toàn / Thông tin thông thường |
 | caution | `--warning` | Cần cảnh giác / Xác minh thêm |
 | danger | `--negative` | NGUY HIỂM – DẤU HIỆU LỪA ĐẢO CAO |
+
+Icons in UI are **inline SVG** (no unicode emoji): nav bulletin/chat, mic, play/pause, level dot, radio markers.
 
 Reasons: bullets, 18px. Advice: semibold first line “Bạn nên:”.
 

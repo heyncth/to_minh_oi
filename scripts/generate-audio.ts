@@ -26,6 +26,20 @@ async function main() {
     process.exit(1);
   }
 
+  const force = process.argv.includes("--force");
+  if (force) {
+    const ids = (rows ?? []).map((r) => r.id);
+    if (ids.length) {
+      const { error: clr } = await supabase
+        .from("announcements")
+        .update({ audio_url: null })
+        .in("id", ids);
+      if (clr) console.error("clear audio_url:", clr.message);
+      for (const r of rows ?? []) r.audio_url = null;
+      console.log(`force: cleared audio_url for ${ids.length}`);
+    }
+  }
+
   let ok = 0;
   let skip = 0;
   let fail = 0;

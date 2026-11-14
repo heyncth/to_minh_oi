@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { RAG_CHIPS, SCAM_SAMPLES } from "@/lib/chat-samples";
+import { IconLevelDot, IconMic } from "./Icons";
 
 type Role = "user" | "assistant";
 type HistoryItem = { role: Role; content: string };
@@ -38,23 +39,20 @@ const MAX_HISTORY = 10;
 
 const SCAM_META: Record<
   ScamPayload["level"],
-  { header: string; emoji: string; color: string; bg: string }
+  { header: string; color: string; bg: string }
 > = {
   danger: {
     header: "NGUY HIỂM – DẤU HIỆU LỪA ĐẢO CAO",
-    emoji: "🔴",
     color: "#ffffff",
     bg: "var(--negative)",
   },
   caution: {
     header: "Cần cảnh giác / Xác minh thêm",
-    emoji: "🟡",
     color: "#ffffff",
     bg: "var(--warning)",
   },
   safe: {
     header: "An toàn / Thông tin thông thường",
-    emoji: "🟢",
     color: "#ffffff",
     bg: "var(--positive)",
   },
@@ -113,14 +111,20 @@ export function ChatPanel() {
   const [busy, setBusy] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
+  const [micSupported, setMicSupported] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const recRef = useRef<{ stop: () => void } | null>(null);
 
   useEffect(() => {
-    // defer hydration so SSR markup matches first client paint
+    // defer post-mount work so SSR markup matches first client paint
     const t = window.setTimeout(() => {
       setTurns(loadStored());
       setHydrated(true);
+      const W = window as unknown as {
+        SpeechRecognition?: unknown;
+        webkitSpeechRecognition?: unknown;
+      };
+      setMicSupported(Boolean(W.SpeechRecognition || W.webkitSpeechRecognition));
     }, 0);
     return () => window.clearTimeout(t);
   }, []);
@@ -247,14 +251,6 @@ export function ChatPanel() {
     recRef.current = rec;
   }
 
-  const micSupported =
-    typeof window !== "undefined" &&
-    Boolean(
-      (window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
-        .SpeechRecognition ||
-        (window as unknown as { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition,
-    );
-
   const showEmpty = hydrated && turns.length === 0;
 
   return (
@@ -363,7 +359,7 @@ export function ChatPanel() {
             aria-label="Nhập bằng giọng nói"
             onClick={toggleMic}
           >
-            🎤
+            <IconMic width={22} height={22} />
           </button>
         )}
         <input
@@ -392,7 +388,12 @@ function AssistantBody({ turn }: { turn: Turn }) {
     return (
       <div className="bubble bubble--assistant bubble--scam">
         <div className="scam-card__header" style={{ background: meta.bg, color: meta.color }}>
-          <span aria-hidden="true">{meta.emoji}</span> {meta.header}
+          <IconLevelDot
+            width={14}
+            height={14}
+            style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}
+          />
+          {meta.header}
         </div>
         <ul className="scam-card__reasons">
           {reply.reasons.map((r) => (

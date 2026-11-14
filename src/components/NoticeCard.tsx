@@ -20,9 +20,14 @@ export function NoticeCard({ item }: { item: Announcement }) {
   const [showOriginal, setShowOriginal] = useState(false);
 
   const speakText = [
-    item.summary_main,
-    item.summary_time_location,
-    item.summary_action_required,
+    item.title,
+    item.summary_main ? `Tóm tắt: ${item.summary_main}` : "",
+    item.summary_time_location
+      ? `Thời gian và địa điểm: ${item.summary_time_location}`
+      : "",
+    item.summary_action_required
+      ? `Người dân cần làm gì: ${item.summary_action_required}`
+      : "",
   ]
     .filter(Boolean)
     .join(". ");

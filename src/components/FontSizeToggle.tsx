@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { IconRadioOff, IconRadioOn } from "./Icons";
 
 type Scale = "md" | "lg" | "xl";
 
@@ -64,7 +65,11 @@ export function FontSizeToggle() {
               className="font-popover__option"
               onClick={() => apply(o.value)}
             >
-              <span aria-hidden="true">{scale === o.value ? "●" : "○"}</span>
+              {scale === o.value ? (
+                <IconRadioOn width={20} height={20} />
+              ) : (
+                <IconRadioOff width={20} height={20} />
+              )}
               {o.label}
             </button>
           ))}

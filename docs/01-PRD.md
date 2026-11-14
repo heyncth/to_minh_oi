@@ -28,7 +28,7 @@ Content in group chats scrolls away. Small text and walls of words lose the audi
 | Pillar | What it does |
 |--------|----------------|
 | **Bảng tin** | Structured bulletin cards (summary / time-place / action) + Vietnamese listen button |
-| **Trợily** | One chat: procedure Q&A (RAG) **and** scam message/link check (AI intent routing) |
+| **Trợ lý** | One chat: procedure Q&A (RAG) **and** scam message/link check (AI intent routing) |
 | **Admin** | Tổ trưởng pastes text or uploads a photo → AI drafts the 3-block notice → publish |
 
 ### 1.3 Success metrics (demo)
@@ -74,7 +74,7 @@ Content in group chats scrolls away. Small text and walls of words lose the audi
 |----|-------------|
 | FR-01 | `manifest.json` + icons; dismissible “Add to Home Screen” prompt |
 | FR-02 | Font scale control **Vừa / Lớn / Rất lớn** persisted in `localStorage` |
-| FR-03 | Bottom nav **2 tabs**: **Bảng tin** · **Trợily** (admin not a resident tab) |
+| FR-03 | Bottom nav **2 tabs**: **Bảng tin** · **Trợ lý** (admin not a resident tab) |
 | FR-04 | Network required; friendly VI error if offline — no offline content cache |
 
 ### 3.2 Module A — Bảng tin (Smart bulletin)
@@ -88,7 +88,7 @@ Content in group chats scrolls away. Small text and walls of words lose the audi
 | FR-14 | **Nghe thông báo** button: Web Speech VN if available, else pre-generated MP3 (`audio_url`), else hide |
 | FR-15 | Controls: pause / resume / read again |
 
-### 3.3 Module B — Trợily (unified assistant)
+### 3.3 Module B — Trợ lý (unified assistant)
 
 | ID | Requirement |
 |----|-------------|

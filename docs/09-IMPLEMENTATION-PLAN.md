@@ -21,7 +21,7 @@
 
 ```text
 P0 Foundation → P1 Shell+Brand → P2 Bulletin+TTS
-→ P3 Admin publish → P4 Trợily RAG+Scam → P5 Polish+Deploy+Demo
+→ P3 Admin publish → P4 Trợ lý RAG+Scam → P5 Polish+Deploy+Demo
 ```
 
 | Phase | Days (suggested) | Depends on |
@@ -88,7 +88,7 @@ Admin (P3) can parallel P4 after P0.
 | 3.4 | Editor form + confidence notes | Publish flow works |
 | 3.5 | Audio button + failure toast | AC-16.2 |
 
-### P4 — Trợily (day 5–8)
+### P4 — Trợ lý (day 5–8)
 
 | # | Task | Done when |
 |---|------|-----------|

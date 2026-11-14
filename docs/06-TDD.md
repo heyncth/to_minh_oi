@@ -24,7 +24,7 @@
 ```text
 ┌──────────────────────────── Browser ────────────────────────────┐
 │  PWA shell (manifest)                                           │
-│  Bảng tin UI · Trợily UI · Admin UI                            │
+│  Bảng tin UI · Trợ lý UI · Admin UI                            │
 │  Web Speech (TTS/STT) · sessionStorage history · font-scale    │
 │  <audio> fallback MP3                                           │
 └───────────────┬─────────────────────────────┬───────────────────┘
@@ -121,7 +121,7 @@ Hidden vs delete: `PATCH is_published=false` keeps history; `DELETE` removes row
 
 ---
 
-## 5. Module B — Trợily (unified chat)
+## 5. Module B — Trợ lý (unified chat)
 
 ### 5.1 Intent classification
 

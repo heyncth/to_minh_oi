@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { IconPause, IconPlay } from "./Icons";
 
 type State = "idle" | "playing" | "paused" | "unsupported";
 
@@ -134,12 +135,12 @@ export function ListenButton({
 
   const label =
     state === "playing" ? "Dừng" : state === "paused" ? "Tiếp tục" : "Nghe thông báo";
-  const icon = state === "playing" ? "⏸" : "▶";
+  const Icon = state === "playing" ? IconPause : IconPlay;
 
   return (
     <span style={{ display: "inline-flex", gap: 8, flexWrap: "wrap" }}>
       <button type="button" className="btn btn--primary" onClick={toggle} aria-label={label}>
-        <span aria-hidden="true">{icon}</span>
+        <Icon width={18} height={18} />
         {label}
       </button>
       {(state === "playing" || state === "paused") && (

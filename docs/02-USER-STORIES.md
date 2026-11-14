@@ -28,7 +28,7 @@
 
 **As** P, **I want** a simple bottom bar, **so that** I always know where I am.
 
-**AC-02.1** Given any public page, Then bottom nav shows exactly **Bảng tin** and **Trợily** with icons + labels.  
+**AC-02.1** Given any public page, Then bottom nav shows exactly **Bảng tin** and **Trợ lý** with icons + labels.  
 **AC-02.2** Given I tap a tab, Then it becomes active state within one tap (no hamburger).
 
 ### US-03 · Font size (M)
@@ -65,13 +65,13 @@
 
 ---
 
-## Epic 3 — Trợily chat
+## Epic 3 — Trợ lý chat
 
 ### US-06 · Ask procedure question (M)
 
 **As** P, **I want** to ask “làm X cần gì?”, **so that** I prepare papers before going out.
 
-**AC-06.1** Given on Trợily, When I send a procedure question, Then answer includes available fields among hồ sơ / nơi nộp / thời gian / lệ phí.  
+**AC-06.1** Given on Trợ lý, When I send a procedure question, Then answer includes available fields among hồ sơ / nơi nộp / thời gian / lệ phí.  
 **AC-06.2** Given answer with sources, Then UI can show procedure names used (trust cue).  
 **AC-06.3** Given question outside corpus, Then fixed guardrail sentence to **Bộ phận Một cửa UBND phường Cẩm Lệ** (`guardrail: true`).
 

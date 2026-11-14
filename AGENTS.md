@@ -52,7 +52,7 @@ If a script is missing, add it to `package.json` rather than inventing ad-hoc on
 3. **RLS stays on.** Public reads only `announcements.is_published = true` and active procedures.
 4. **Chat is stateless on server.** Do not add a `messages` table or persist conversations. History lives in client `sessionStorage` and is sent as `history[]`.
 5. **One chat endpoint.** Scam check is **not** a separate `/api/scam-check`. Use `POST /api/chat` with `type: rag | scam` (see API spec).
-6. **Two bottom tabs only:** Bảng tin · Trợily. Do not add a third resident tab.
+6. **Two bottom tabs only:** Bảng tin · Trợ lý. Do not add a third resident tab.
 7. **Models pinned:** `GEMINI_MODEL=gemini-3.5-flash-lite`, `GEMINI_EMBEDDING_MODEL=gemini-embedding-2`, dim **768**. Do not switch to `gemini-2.5-flash` for new code.
 8. **Guardrail sentence** (exact):  
    `Thông tin này chưa có trong dữ liệu hướng dẫn của phường, cô/chú vui lòng liên hệ trực tiếp Bộ phận Một cửa UBND phường Cẩm Lệ để được hướng dẫn chính xác.`
@@ -84,7 +84,7 @@ If a script is missing, add it to `package.json` rather than inventing ad-hoc on
 | Errors to users | Vietnamese, no stack traces, no English SDK messages |
 | API errors | Shape `{ error: { code, message } }` — codes from API spec |
 | Categories | Exactly: `Hành chính`, `Y tế`, `Môi trường`, `An ninh`, `Sự kiện` |
-| Scam levels | `safe` \| `caution` \| `danger` → 🟢🟡🔴 |
+| Scam levels | `safe` \| `caution` \| `danger` → red/amber/green SVG level dot |
 | DB uuid | `gen_random_uuid()` |
 | Timestamps | `timestamptz` UTC |
 
