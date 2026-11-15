@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { bulletinSpeechText, DEFAULT_VOICE, synthesizeMp3 } from "@/lib/edge-tts";
+import { DEFAULT_VOICE, synthesizeMp3 } from "@/lib/edge-tts";
+import { bulletinSpeechText } from "@/lib/speech-text";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -56,14 +57,13 @@ export async function POST(_req: Request, { params }: Params) {
 
     return NextResponse.json({ audio_url: publicUrl, duration_seconds: duration, bytes });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Edge TTS failed";
+    console.error("audio synth failed", e instanceof Error ? e.message : e);
     return NextResponse.json(
       {
         error: {
           code: "upstream_error",
           message:
             "Chưa tạo được giọng đọc dự phòng — người dùng iPhone có thể chỉ thấy nút đọc máy (Web Speech).",
-          detail: msg,
         },
       },
       { status: 502 },

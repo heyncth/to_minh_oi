@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
@@ -31,16 +31,13 @@ export async function createClient() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnySupabase = any;
-
 /**
  * Verify admin session from cookies, return secret-key client for mutations.
  * Secret key bypasses RLS — only use after getUser() succeeds.
  */
 export async function createAdminClient(): Promise<{
   user: { id: string; email?: string } | null;
-  supabase: AnySupabase | null;
+  supabase: SupabaseClient | null;
 }> {
   const cookieStore = await cookies();
   const sessionClient = createServerClient(

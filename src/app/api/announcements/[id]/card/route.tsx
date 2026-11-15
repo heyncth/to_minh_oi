@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import QRCode from "qrcode";
 import { getPublishedAnnouncement, siteUrl } from "@/lib/announcements";
+import { formatDate } from "@/lib/format";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -31,6 +32,9 @@ let fontsPromise: Promise<
 > | null = null;
 
 let iconPromise: Promise<string> | null = null;
+
+// shortcut: module-level cache, resets on cold start only
+const qrCache = new Map<string, string>();
 
 function loadIcon() {
   if (!iconPromise) {
@@ -65,18 +69,6 @@ function loadFonts() {
     );
   }
   return fontsPromise;
-}
-
-function formatDate(iso: string) {
-  try {
-    return new Intl.DateTimeFormat("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(new Date(iso));
-  } catch {
-    return "";
-  }
 }
 
 function Chip({ label, bg, fg }: { label: string; bg: string; fg: string }) {
@@ -205,12 +197,17 @@ export async function GET(req: Request, { params }: Params) {
     );
   } else {
     // Photo share — ground canvas, 96px header, framed white card, QR row.
-    const qrDataUrl = await QRCode.toDataURL(`${siteUrl()}/bang-tin/${id}`, {
-      margin: 1,
-      width: 480,
-      errorCorrectionLevel: "M",
-      color: { dark: ACCENT, light: SURFACE },
-    });
+    const qrKey = `${siteUrl()}/bang-tin/${id}`;
+    let qrDataUrl = qrCache.get(qrKey);
+    if (!qrDataUrl) {
+      qrDataUrl = await QRCode.toDataURL(qrKey, {
+        margin: 1,
+        width: 480,
+        errorCorrectionLevel: "M",
+        color: { dark: ACCENT, light: SURFACE },
+      });
+      qrCache.set(qrKey, qrDataUrl);
+    }
     const summary = item.summary_main;
     const timeLine = item.summary_time_location;
 

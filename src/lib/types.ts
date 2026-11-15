@@ -1,3 +1,5 @@
+import { CATEGORIES as DB_CATEGORIES } from "@/lib/validation";
+
 export type Announcement = {
   id: string;
   title: string;
@@ -13,13 +15,7 @@ export type Announcement = {
   created_at: string;
 };
 
-export const CATEGORIES = [
-  "Tất cả",
-  "Hành chính",
-  "Y tế",
-  "Môi trường",
-  "An ninh",
-  "Sự kiện",
-] as const;
+/** Filter chips: "Tất cả" + the five DB categories (validation.ts is the source of truth). */
+export const CATEGORIES = ["Tất cả", ...DB_CATEGORIES] as const;
 
 export type CategoryFilter = (typeof CATEGORIES)[number];

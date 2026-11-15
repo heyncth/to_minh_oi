@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
   try {
     // Admin with session can list drafts via ?all=1; public always published-only.
-    let items: unknown[] = [];
+    let q;
     if (all) {
       const { user, supabase } = await createAdminClient();
       if (!user || !supabase) {
@@ -23,26 +23,17 @@ export async function GET(request: Request) {
           { status: 401 },
         );
       }
-      let q = supabase.from("announcements").select(SELECT).order("created_at", { ascending: false }).limit(50);
-      if (category && category !== "Tất cả") q = q.eq("category", category);
-      const { data, error } = await q;
-      if (error) throw new Error(error.message);
-      items = data ?? [];
+      q = supabase.from("announcements").select(SELECT);
     } else {
       const supabase = await createClient();
-      let q = supabase
-        .from("announcements")
-        .select(SELECT)
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (category && category !== "Tất cả") q = q.eq("category", category);
-      const { data, error } = await q;
-      if (error) throw new Error(error.message);
-      items = data ?? [];
+      q = supabase.from("announcements").select(SELECT).eq("is_published", true);
     }
 
-    return NextResponse.json({ items: items.slice(0, limit), nextCursor: null });
+    if (category && category !== "Tất cả") q = q.eq("category", category);
+    const { data, error } = await q.order("created_at", { ascending: false }).limit(limit);
+    if (error) throw new Error(error.message);
+
+    return NextResponse.json({ items: data ?? [] });
   } catch {
     return NextResponse.json(
       { error: { code: "internal_error", message: "Không tải được bảng tin. Vui lòng thử lại." } },

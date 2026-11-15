@@ -127,6 +127,16 @@ async function main() {
     if (!error) {
       createdBy = data.users.find((u) => u.email?.toLowerCase() === adminEmail.toLowerCase())?.id ?? null;
     }
+    if (createdBy) {
+      // RLS admin gate (docs/07 §5): register seeded admin in admin_users.
+      const { error: admErr } = await supabase
+        .from("admin_users")
+        .upsert({ id: createdBy }, { onConflict: "id", ignoreDuplicates: true });
+      if (admErr) console.error("admin_users upsert:", admErr.message);
+      else console.log(`admin_users: registered ${adminEmail}`);
+    } else {
+      console.error(`ADMIN_EMAIL ${adminEmail} not found — RLS admin policies stay closed`);
+    }
   }
 
   let upserted = 0;
@@ -172,15 +182,19 @@ async function main() {
     }
   }
 
-  // drop old seed rows (titles no longer in ANNOUNCEMENTS)
+  // drop old seed rows (titles no longer in ANNOUNCEMENTS) — only our own rows
   const keep = new Set(ANNOUNCEMENTS.map((a) => a.title));
+  if (!createdBy) {
+    console.error("skip legacy delete — no admin id, cannot prove rows are ours");
+  }
   for (const title of LEGACY_TITLES) {
-    if (keep.has(title)) continue;
+    if (keep.has(title) || !createdBy) continue;
     const { error } = await supabase
       .from("announcements")
       .delete()
       .eq("title", title)
-      .eq("is_published", true);
+      .eq("is_published", true)
+      .eq("created_by", createdBy);
     if (error) {
       console.error(`fail delete legacy: ${title}: ${error.message}`);
       process.exitCode = 1;

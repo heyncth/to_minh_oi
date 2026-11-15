@@ -5,6 +5,14 @@ import { IconPause, IconPlay } from "./Icons";
 
 type State = "idle" | "playing" | "paused" | "unsupported";
 
+/** null = voices not loaded yet (Chrome/Android return [] until voiceschanged). */
+function detectViVoice(): boolean | null {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) return null;
+  return voices.some((v) => v.lang?.toLowerCase().startsWith("vi"));
+}
+
 /**
  * Dual TTS: Web Speech primary; MP3 (audio_url) fallback; hide if neither.
  * Speak summary blocks only — not full original text.
@@ -27,9 +35,8 @@ export function ListenButton({
     }
 
     const detect = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length === 0) return;
-      setHasViVoice(voices.some((v) => v.lang?.toLowerCase().startsWith("vi")));
+      const v = detectViVoice();
+      if (v !== null) setHasViVoice(v);
     };
 
     detect();
@@ -74,10 +81,15 @@ export function ListenButton({
   }, [text]);
 
   function toggle() {
-    if (state === "unsupported") return;
+    // Voices may still be loading — re-check instead of bricking the button.
+    let vi = hasViVoice;
+    if (vi === null) {
+      vi = detectViVoice();
+      if (vi !== null) setHasViVoice(vi);
+    }
 
     // Web Speech path
-    if (hasViVoice) {
+    if (vi) {
       if (state === "playing") {
         window.speechSynthesis.pause();
         setState("paused");
@@ -110,7 +122,8 @@ export function ListenButton({
       return;
     }
 
-    // neither
+    // Still unknown — wait for voiceschanged, do not lock the button.
+    if (vi === null) return;
     setState("unsupported");
   }
 

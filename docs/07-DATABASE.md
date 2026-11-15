@@ -181,6 +181,8 @@ $$;
 
 ## 5. Row Level Security
 
+Final state after `001_init.sql` + `002_admin_rls.sql`:
+
 ```sql
 alter table announcements enable row level security;
 alter table admin_procedures enable row level security;
@@ -190,27 +192,35 @@ create policy "public_read_published_announcements"
   on announcements for select
   using (is_published = true);
 
--- Admin: full CRUD (authenticated + email matches seeded admin)
+-- Admin: full CRUD — only rows in admin_users (seeded admin)
 create policy "admin_all_announcements"
   on announcements for all
-  using (auth.role() = 'authenticated')
-  with check (auth.role() = 'authenticated');
+  using (is_admin())
+  with check (is_admin());
 
 -- Public: read active procedures (RAG corpus is public knowledge)
 create policy "public_read_procedures"
   on admin_procedures for select
   using (is_active = true);
 
--- Admin: manage procedures
+-- Admin: manage procedures — only rows in admin_users (seeded admin)
 create policy "admin_all_procedures"
   on admin_procedures for all
-  using (auth.role() = 'authenticated')
-  with check (auth.role() = 'authenticated');
+  using (is_admin())
+  with check (is_admin());
 ```
 
-Hardening for production beyond demo:
+`admin_users` + `is_admin()` live in `supabase/migrations/002_admin_rls.sql`.
+RLS on `admin_users` is default-deny; membership is read only via the
+security-definer `is_admin()`. Register the seeded admin once:
 
-- Restrict admin policies to `auth.uid() = created_by` for announcements, or a `profiles.role = 'admin'` check.
+```sql
+insert into admin_users (id) values ('<admin-user-uuid>') on conflict do nothing;
+```
+
+Hardening notes:
+
+- Any `authenticated` session that is **not** in `admin_users` has no write access — disabling public sign-up stays required, but is no longer the only gate.
 - Service role key bypasses RLS — server-only.
 
 ---
@@ -370,9 +380,9 @@ Ghi chú: Một số dịch vụ công liên thông đã thực hiện trực tu
 3. Run §3 DDL, §4 RPC, §5 RLS, §7 trigger.
 4. Create Storage bucket `announcements` (public).
 5. Disable public sign-up (Auth settings).
-6. Create seeded admin user.
+6. Create seeded admin user + `insert into admin_users (id) values ('<uuid>');` (see §5).
 7. Run seed: announcements + procedures + embeddings + optional TTS MP3s.
-8. Verify RLS: anon client cannot `select` unpublished rows; cannot `insert`.
+8. Verify RLS: anon client cannot `select` unpublished rows; cannot `insert`; a second non-admin user cannot `insert`.
 
 ---
 

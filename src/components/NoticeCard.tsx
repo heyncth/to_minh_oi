@@ -2,38 +2,17 @@
 
 import { useState } from "react";
 import type { Announcement } from "@/lib/types";
+import { formatDate } from "@/lib/format";
+import { bulletinSpeechText } from "@/lib/speech-text";
 import { ListenButton } from "./ListenButton";
 import { ShareSheet } from "./ShareSheet";
 import { IconShare } from "./Icons";
-
-function formatDate(iso: string) {
-  try {
-    return new Intl.DateTimeFormat("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(new Date(iso));
-  } catch {
-    return "";
-  }
-}
 
 export function NoticeCard({ item }: { item: Announcement }) {
   const [showOriginal, setShowOriginal] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  const speakText = [
-    item.title,
-    item.summary_main ? `Tóm tắt: ${item.summary_main}` : "",
-    item.summary_time_location
-      ? `Thời gian và địa điểm: ${item.summary_time_location}`
-      : "",
-    item.summary_action_required
-      ? `Người dân cần làm gì: ${item.summary_action_required}`
-      : "",
-  ]
-    .filter(Boolean)
-    .join(". ");
+  const speakText = bulletinSpeechText(item);
 
   return (
     <article className="card" style={{ display: "grid", gap: 12 }}>

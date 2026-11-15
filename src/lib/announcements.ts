@@ -19,7 +19,8 @@ export const getPublishedAnnouncement = cache(
     });
     const res = await fetch(`${base}/rest/v1/announcements?${qs}`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
-      cache: "no-store",
+      // per-id published data — short cache, CDN + RSC share it
+      next: { revalidate: 300 },
     });
     if (!res.ok) return null;
     const rows = (await res.json()) as Announcement[];

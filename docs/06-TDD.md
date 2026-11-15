@@ -32,7 +32,7 @@
                 ▼                             ▼
 ┌─────────────────────────── Next.js (Vercel) ────────────────────┐
 │  Route Handlers                                                 │
-│  /api/chat          intent → RAG | scam                         │
+│  /api/chat          retrieve → RAG | route+scam                  │
 │  /api/summarize     text|image → structured draft               │
 │  /api/announcements CRUD + audio job                            │
 │  Auth guard (admin session cookie)                              │
@@ -339,7 +339,7 @@ Never show stack traces or English SDK errors to residents.
 | Device matrix | Android Chrome, iOS Safari, desktop Edge — TTS + install prompt |
 | Seed QA | 5 questions hit correct procedure; 3 scam samples → danger |
 
-No heavy CI contract tests required for competition v1; `lint` + `typecheck` gate.
+No heavy CI contract tests required for competition v1; `lint` + `typecheck` + `test` (`check-intent`: JSON parse, guardrail, route prompt) gate.
 
 ---
 

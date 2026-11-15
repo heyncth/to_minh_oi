@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/check-intent.ts",
     "seed:procedures": "tsx scripts/seed-procedures.ts",
     "seed:announcements": "tsx scripts/seed-announcements.ts",
     "embed:procedures": "tsx scripts/embed-procedures.ts",

@@ -18,7 +18,7 @@
 | Success | Resource-shaped object (no envelope) unless listed |
 | Language | Error `message` shown to users: **Vietnamese**. Codes stable English snake_case |
 | Timeouts | AI routes: 15 s upstream budget; app target UX < 5 s summarize |
-| Rate limiting | Best-effort per-IP in-memory / Vercel-level; always handle Gemini `429` |
+| Rate limiting | `POST /api/chat`: in-memory per-IP, 10/min per server instance (best-effort) + Vercel-level; always handle Gemini `429` |
 
 ### Error codes
 
@@ -78,13 +78,13 @@ Unified Trợ lý tab. Server classifies intent, then runs RAG or scam pipeline.
 
 ### Server pipeline
 
-1. Validate body.
-2. **Intent** (single Gemini call or cheap pre-step — see `06-TDD.md`):
-   - `rag` — question about procedures/services
-   - `scam` — user pasted SMS/Zalo/link/text to check, or asks “có lừa đảo không”
-3. Branch:
-   - **rag:** embed `message` → `match_procedures` → if top similarity < threshold → **guardrail** answer; else Gemini answer grounded in chunks.
-   - **scam:** Gemini structured analysis → level + reasons + advice. No DB write.
+1. Validate body; per-IP rate limit (in-memory, 10 req/min, best-effort per instance).
+2. **Retrieve first:** embed `message` → `match_procedures` (top 4).
+3. Branch on top similarity (threshold 0.70):
+   - **hit:** one Gemini call, answer grounded in the matched excerpts; if the model returns the guardrail sentence, fall through to step 4.
+   - **miss:** one Gemini call runs `ROUTE_AND_SCAM_PROMPT` — returns either a scam analysis (`type: "scam"`) or the guardrail (`type: "rag"`, `guardrail: true`). No DB write, no regex.
+
+Client `history[]` is injected as labeled untrusted text (tone only) into the RAG prompt.
 
 ### Response — RAG
 
@@ -171,6 +171,7 @@ Turn pasted text **or** image into announcement draft fields.
 
 - At least one of `text` or `imageUrl`.
 - Image already uploaded to Storage by client **before** this call (simpler auth + size limits at upload).
+- `imageUrl` must be a public URL under the project's `announcements` Storage bucket; any other host is rejected (`bad_request`, SSRF guard).
 - Max text: 20 000 chars. Max image: 2 MB (enforced at upload).
 
 ### Response
@@ -215,8 +216,7 @@ Query:
 | Param | Default | Notes |
 |-------|---------|-------|
 | `category` | all | exact match VN label |
-| `limit` | 20 | max 50 |
-| `cursor` | — | optional `created_at` + `id` composite (v1 may use offset) |
+| `limit` | 20 | max 50, applied server-side |
 
 Response:
 
@@ -236,8 +236,7 @@ Response:
       "audio_url": "https://…/audio/uuid.mp3",
       "created_at": "2026-11-20T01:00:00.000Z"
     }
-  ],
-  "nextCursor": null
+  ]
 }
 ```
 
@@ -297,7 +296,7 @@ Share card image (ImageResponse + QR → `/bang-tin/:id`). Serves both OG link p
 - Public: 200 `image/png`; 404 `{error:{code:"not_found"}}` if not published.
 - `share` QR encodes absolute `/bang-tin/:id` URL (site base from `NEXT_PUBLIC_SITE_URL` / Vercel prod URL).
 - Colors = design tokens (accent `#0b5cab` ladder); fonts Be Vietnam Pro TTF.
-- Cache: `public, max-age=3600, s-maxage=86400`.
+- Cache: `public, max-age=300, s-maxage=600` (card layout ships often; stale PNGs confuse users).
 
 ---
 

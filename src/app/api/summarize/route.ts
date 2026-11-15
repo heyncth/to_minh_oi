@@ -1,19 +1,10 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { createAdminClient } from "@/lib/supabase/server";
+import { parseJsonObject } from "@/lib/intent";
 import { SUMMARIZE_PROMPT } from "@/lib/prompts";
 
 type Body = { text?: string; imageUrl?: string };
-
-function jsonFromModel(raw: string): unknown {
-  const trimmed = raw.trim();
-  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const candidate = fenced ? fenced[1] : trimmed;
-  const start = candidate.indexOf("{");
-  const end = candidate.lastIndexOf("}");
-  if (start < 0 || end <= start) throw new Error("no json");
-  return JSON.parse(candidate.slice(start, end + 1));
-}
 
 export async function POST(req: Request) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -54,6 +45,14 @@ export async function POST(req: Request) {
     }
 
     if (imageUrl.trim()) {
+      // SSRF guard: only our own public Storage images, never arbitrary URLs.
+      const storagePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/announcements/`;
+      if (!imageUrl.startsWith(storagePrefix)) {
+        return NextResponse.json(
+          { error: { code: "bad_request", message: "Ảnh phải nằm trong thư viện ảnh của phường." } },
+          { status: 400 },
+        );
+      }
       const imgRes = await fetch(imageUrl);
       if (!imgRes.ok) throw new Error("image fetch failed");
       const buf = Buffer.from(await imgRes.arrayBuffer());
@@ -76,7 +75,7 @@ export async function POST(req: Request) {
     });
 
     const raw = result.text ?? "";
-    const parsed = jsonFromModel(raw) as Record<string, unknown>;
+    const parsed = parseJsonObject(raw);
 
     return NextResponse.json({
       title: String(parsed.title ?? ""),

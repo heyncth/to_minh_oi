@@ -4,7 +4,8 @@
  * Uses SUPABASE_SECRET_KEY + public bucket announcements.
  */
 import { createClient } from "@supabase/supabase-js";
-import { bulletinSpeechText, DEFAULT_VOICE, synthesizeMp3 } from "../src/lib/edge-tts";
+import { DEFAULT_VOICE, synthesizeMp3 } from "../src/lib/edge-tts";
+import { bulletinSpeechText } from "../src/lib/speech-text";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secret = process.env.SUPABASE_SECRET_KEY;
@@ -27,25 +28,14 @@ async function main() {
   }
 
   const force = process.argv.includes("--force");
-  if (force) {
-    const ids = (rows ?? []).map((r) => r.id);
-    if (ids.length) {
-      const { error: clr } = await supabase
-        .from("announcements")
-        .update({ audio_url: null })
-        .in("id", ids);
-      if (clr) console.error("clear audio_url:", clr.message);
-      for (const r of rows ?? []) r.audio_url = null;
-      console.log(`force: cleared audio_url for ${ids.length}`);
-    }
-  }
 
   let ok = 0;
   let skip = 0;
   let fail = 0;
 
   for (const row of rows ?? []) {
-    if (row.audio_url) {
+    // --force regenerates in place: old MP3 stays public until the new upload lands.
+    if (row.audio_url && !force) {
       skip += 1;
       console.log(`skip (has audio): ${row.title}`);
       continue;
