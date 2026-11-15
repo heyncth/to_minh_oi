@@ -153,7 +153,7 @@ No bottom nav (or bottom nav hidden). List + editor as main pane.
 
 - Urgent card: optional 1.5px left border `--negative` **or** pill only (choose pill; avoid double signal clutter).
 - Listen button: filled `--accent`, white text, min-height 48. States: idle / playing (“Dừng”) / paused (“Tiếp tục”) / hidden.
-- Share button: ghost, label **“Chia sẻ”**, icon share SVG (no emoji). Tap → native share sheet with card PNG (`navigator.share({files})`), fallback download `tin-to-minh-oi.png`. Card URL: `GET /api/announcements/:id/card?variant=share`.
+- Share button: ghost, label **“Chia sẻ”**, icon share SVG (no emoji). Tap → **custom bottom sheet** (`ShareSheet.tsx`): drag handle · title “Chia sẻ tin này” · close X · preview of share card PNG (`GET /api/announcements/:id/card?variant=share`) · link row `/bang-tin/:id` · full-width **“Tải ảnh chia sẻ”** (primary) + **“Sao chép liên kết”** (ghost, “Đã sao chép liên kết” 2 s). Backdrop click / Esc closes. Tokens only; z-index 60; safe-area bottom pad.
 - Detail page `/bang-tin/:id` (deep link target for QR/Zalo): back link **“← Xem tất cả thông báo của tổ”** above NoticeCard → `/`.
 
 ### 4.2 Trợ lý (`/tro-ly`)

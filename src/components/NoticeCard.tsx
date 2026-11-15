@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Announcement } from "@/lib/types";
 import { ListenButton } from "./ListenButton";
+import { ShareSheet } from "./ShareSheet";
 import { IconShare } from "./Icons";
 
 function formatDate(iso: string) {
@@ -19,27 +20,7 @@ function formatDate(iso: string) {
 
 export function NoticeCard({ item }: { item: Announcement }) {
   const [showOriginal, setShowOriginal] = useState(false);
-
-  async function handleShare() {
-    try {
-      const res = await fetch(`/api/announcements/${item.id}/card?variant=share`);
-      if (!res.ok) return;
-      const blob = await res.blob();
-      const file = new File([blob], "tin-to-minh-oi.png", { type: "image/png" });
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: item.title });
-        return;
-      }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "tin-to-minh-oi.png";
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      // user closed share sheet — stay silent
-    }
-  }
+  const [shareOpen, setShareOpen] = useState(false);
 
   const speakText = [
     item.title,
@@ -111,7 +92,7 @@ export function NoticeCard({ item }: { item: Announcement }) {
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <ListenButton text={speakText} audioUrl={item.audio_url} />
-        <button type="button" className="btn btn--ghost" onClick={handleShare}>
+        <button type="button" className="btn btn--ghost" onClick={() => setShareOpen(true)}>
           <IconShare width={18} height={18} style={{ verticalAlign: "-3px" }} /> Chia sẻ
         </button>
         {item.original_text && (
@@ -149,6 +130,8 @@ export function NoticeCard({ item }: { item: Announcement }) {
           style={{ width: "100%", borderRadius: "var(--control-radius)", border: "1px solid var(--border)" }}
         />
       )}
+
+      <ShareSheet open={shareOpen} onClose={() => setShareOpen(false)} id={item.id} />
     </article>
   );
 }
