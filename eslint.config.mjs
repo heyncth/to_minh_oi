@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Video-demo skill + corpus (not app source):
+    ".agents/**",
+    "demo-out/**",
   ]),
 ]);
 

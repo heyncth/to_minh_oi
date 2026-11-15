@@ -12,7 +12,8 @@
     "seed:announcements": "tsx scripts/seed-announcements.ts",
     "embed:procedures": "tsx scripts/embed-procedures.ts",
     "generate:audio": "tsx scripts/generate-audio.ts",
-    "check:intent": "tsx scripts/check-intent.ts"
+    "check:intent": "tsx scripts/check-intent.ts",
+    "demo:audio": "tsx scripts/gen-demo-audio.ts"
   },
   "dependencies": {
     "@andresaya/edge-tts": "^1.9.1",

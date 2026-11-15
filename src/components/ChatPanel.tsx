@@ -105,6 +105,11 @@ function sourceLine(sources: RagPayload["sources"]): string | null {
   return `Nguồn: ${top.procedure_name} · độ tương đồng ${pct}%`;
 }
 
+/** Gemini may emit markdown emphasis; the bubble renders plain text. */
+function plainAnswer(text: string): string {
+  return text.replace(/[*`]/g, "").replace(/^#{1,6}\s*/gm, "").trim();
+}
+
 export function ChatPanel() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
@@ -410,7 +415,7 @@ function AssistantBody({ turn }: { turn: Turn }) {
   const src = sourceLine(reply.sources);
   return (
     <div className="bubble bubble--assistant">
-      <p className="bubble__text">{reply.answer}</p>
+      <p className="bubble__text">{plainAnswer(reply.answer)}</p>
       {src && !reply.guardrail && <p className="bubble__source">{src}</p>}
     </div>
   );
