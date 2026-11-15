@@ -29,7 +29,9 @@ export function ShareSheet({ open, onClose, id }: Props) {
         setCopied(false);
         setFailed(false);
         try {
-          const res = await fetch(`/api/announcements/${id}/card?variant=share`);
+          const res = await fetch(`/api/announcements/${id}/card?variant=share`, {
+          cache: "no-store",
+        });
           if (!res.ok) throw new Error("bad status");
           const blob = await res.blob();
           if (!alive) return;

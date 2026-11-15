@@ -231,6 +231,7 @@ export async function GET(req: Request, { params }: Params) {
             flex: 1,
             display: "flex",
             flexDirection: "column",
+            justifyContent: "center",
             gap: 24,
             padding: "40px 48px",
             minHeight: 0,
@@ -268,8 +269,6 @@ export async function GET(req: Request, { params }: Params) {
               {summary}
             </div>
           )}
-
-          <div style={{ flex: 1 }} />
 
           <div style={{ display: "flex", justifyContent: "center" }}>
             <div
@@ -313,7 +312,8 @@ export async function GET(req: Request, { params }: Params) {
     fonts,
     headers: {
       "Content-Type": "image/png",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400",
+      // short edge cache — card layout ships often, stale PNGs confuse users
+      "Cache-Control": "public, max-age=300, s-maxage=600",
     },
   });
 }
