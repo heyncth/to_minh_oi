@@ -289,7 +289,7 @@ export async function GET(req: Request, { params }: Params) {
                   color: ACCENT_INK,
                   lineHeight: 1.4,
                   display: "block",
-                  lineClamp: 2,
+                  lineClamp: 3,
                   overflow: "hidden",
                 }}
               >
