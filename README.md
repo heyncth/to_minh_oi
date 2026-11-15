@@ -29,6 +29,14 @@ npm run embed:procedures    # embedding 768 chiều
 npm run generate:audio      # MP3 giọng đọc (Edge TTS)
 ```
 
+## Demo video
+
+```bash
+npm run demo:build   # cần clip demo-out/light/*.mp4 + audio/*.mp3 (xem scripts/build-demo-video.mjs)
+```
+
+Kết quả: `public/demo-to-minh-oi.mp4` (1920x1080, ~90s, có voice-over). File này nằm ngoài git — build lại khi cần.
+
 ## Tài liệu
 
 Bộ docs `docs/01` → `docs/09` là nguồn chuẩn cho hành vi sản phẩm.
