@@ -23,11 +23,23 @@ const URGENT_BG = "#ffe4e6";
 const URGENT_INK = "#9f1239";
 
 const FONT_DIR = path.join(process.cwd(), "fonts");
+const ICON_PATH = path.join(process.cwd(), "public", "icons", "icon-512.png");
 
 // shortcut: module-level cache, resets on cold start only
 let fontsPromise: Promise<
   Array<{ name: string; data: ArrayBuffer; weight: 400 | 500 | 700; style: "normal" }>
 > | null = null;
+
+let iconPromise: Promise<string> | null = null;
+
+function loadIcon() {
+  if (!iconPromise) {
+    iconPromise = readFile(ICON_PATH).then(
+      (buf) => `data:image/png;base64,${buf.toString("base64")}`,
+    );
+  }
+  return iconPromise;
+}
 
 function loadFonts() {
   if (!fontsPromise) {
@@ -84,25 +96,23 @@ function Chip({ label, bg, fg }: { label: string; bg: string; fg: string }) {
   );
 }
 
-function Wordmark({ onAccent = false }: { onAccent?: boolean }) {
+function Wordmark({
+  onAccent = false,
+  icon,
+}: {
+  onAccent?: boolean;
+  icon: string;
+}) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-      <div
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 10,
-          background: onAccent ? SURFACE : ACCENT,
-          color: onAccent ? ACCENT : SURFACE,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 26,
-          fontWeight: 700,
-        }}
-      >
-        T
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={icon}
+        width={40}
+        height={40}
+        alt=""
+        style={{ borderRadius: 10 }}
+      />
       <div
         style={{
           color: onAccent ? SURFACE : ACCENT,
@@ -132,6 +142,7 @@ export async function GET(req: Request, { params }: Params) {
   const height = variant === "share" ? 1200 : 630;
 
   const fonts = await loadFonts();
+  const icon = await loadIcon();
 
   const chips = (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -164,7 +175,7 @@ export async function GET(req: Request, { params }: Params) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <Wordmark />
+            <Wordmark icon={icon} />
             {chips}
           </div>
 
@@ -225,7 +236,7 @@ export async function GET(req: Request, { params }: Params) {
             padding: "0 48px",
           }}
         >
-          <Wordmark onAccent />
+          <Wordmark onAccent icon={icon} />
           <div style={{ color: SURFACE, fontSize: 24 }}>
             {formatDate(item.created_at)}
           </div>
