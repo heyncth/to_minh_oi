@@ -293,9 +293,9 @@ Client redirects to `/admin/login`.
 
 Share card image (ImageResponse + QR → `/bang-tin/:id`). Serves both OG link preview and the "Chia sẻ" download from one URL.
 
-- Query `variant`: `og` (default, 1200×630 landscape) · `share` (896×1200 portrait, standee-style).
+- Query `variant`: `og` (default, 1200×630 — wordmark + chips + title only, **no QR**) · `share` (896×1200 — header, title, one summary line, QR + CTA).
 - Public: 200 `image/png`; 404 `{error:{code:"not_found"}}` if not published.
-- QR encodes absolute `/bang-tin/:id` URL (site base from `NEXT_PUBLIC_SITE_URL` / Vercel prod URL).
+- `share` QR encodes absolute `/bang-tin/:id` URL (site base from `NEXT_PUBLIC_SITE_URL` / Vercel prod URL).
 - Colors = design tokens (accent `#0b5cab` ladder); fonts Be Vietnam Pro TTF.
 - Cache: `public, max-age=3600, s-maxage=86400`.
 

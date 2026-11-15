@@ -7,16 +7,16 @@ import { getPublishedAnnouncement, siteUrl } from "@/lib/announcements";
 
 type Params = { params: Promise<{ id: string }> };
 
-// Tokens from docs/04-UI-UX-SPEC.md — no random hex.
-const GROUND = "#f4f7fb";
+// docs/04 tokens + card-only inks
 const SURFACE = "#ffffff";
-const RAISED = "#eef2f7";
-const BORDER = "#d7dee8";
+const RULE = "#e8edf3";
 const TEXT = "#0f172a";
 const MUTED = "#4b5563";
+const SUMMARY = "#334155";
 const ACCENT = "#0b5cab";
 const ACCENT_SOFT = "#e8f1fb";
 const ACCENT_INK = "#083d75";
+const ACCENT_TRACK = "#cfe3f7";
 const URGENT_BG = "#ffe4e6";
 const URGENT_INK = "#9f1239";
 
@@ -65,13 +65,12 @@ function formatDate(iso: string) {
   }
 }
 
-function Chip({ label, bg, fg, border }: { label: string; bg: string; fg: string; border?: string }) {
+function Chip({ label, bg, fg }: { label: string; bg: string; fg: string }) {
   return (
     <div
       style={{
         background: bg,
         color: fg,
-        border: border ? `2px solid ${border}` : "none",
         borderRadius: 999,
         padding: "6px 18px",
         fontSize: 22,
@@ -130,69 +129,85 @@ export async function GET(req: Request, { params }: Params) {
   const width = variant === "share" ? 896 : 1200;
   const height = variant === "share" ? 1200 : 630;
 
-  const detailUrl = `${siteUrl()}/bang-tin/${id}`;
-  const qrDataUrl = await QRCode.toDataURL(detailUrl, {
-    margin: 1,
-    width: variant === "share" ? 400 : 320,
-    errorCorrectionLevel: "M",
-    color: { dark: ACCENT, light: SURFACE },
-  });
-
   const fonts = await loadFonts();
-  const card = item;
 
   const chips = (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-      {card.is_urgent && (
-        <Chip label="Khẩn cấp" bg={URGENT_BG} fg={URGENT_INK} />
-      )}
-      <Chip label={card.category} bg={RAISED} fg={MUTED} />
+      {item.is_urgent && <Chip label="Khẩn cấp" bg={URGENT_BG} fg={URGENT_INK} />}
+      <Chip label={item.category} bg={ACCENT_SOFT} fg={ACCENT_INK} />
     </div>
   );
 
-  const qrBlock = (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 16,
-        background: SURFACE,
-        border: `2px solid ${BORDER}`,
-        borderRadius: 16,
-        padding: variant === "share" ? "28px 36px" : "20px 24px",
-      }}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={qrDataUrl}
-        width={variant === "share" ? 340 : 240}
-        height={variant === "share" ? 340 : 240}
-        alt="Mã QR trỏ tới thông báo"
-      />
+  let body;
+
+  if (variant === "og") {
+    // Link preview — white canvas, accent rail, big title. No QR.
+    body = (
       <div
         style={{
-          fontSize: variant === "share" ? 26 : 20,
-          fontWeight: 700,
-          color: ACCENT_INK,
-          textAlign: "center",
+          width,
+          height,
+          display: "flex",
+          background: SURFACE,
+          fontFamily: "Be Vietnam Pro",
         }}
       >
-        Một chạm quét mã – Cả tổ thông tin
-      </div>
-    </div>
-  );
+        <div style={{ width: 16, background: ACCENT, flexShrink: 0 }} />
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            padding: "40px 48px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <Wordmark />
+            {chips}
+          </div>
 
-  const body =
-    variant === "share" ? (
-      // Portrait card — standee-style, for photo share into groups
+          <div
+            style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}
+          >
+            <div
+              style={{
+                fontSize: 54,
+                fontWeight: 700,
+                color: TEXT,
+                lineHeight: 1.25,
+                display: "block",
+                lineClamp: 3,
+                overflow: "hidden",
+              }}
+            >
+              {item.title}
+            </div>
+          </div>
+
+          <div style={{ fontSize: 24, color: MUTED }}>
+            Bảng tin tổ dân phố – Trợ lý hỏi đáp 24/7
+          </div>
+        </div>
+      </div>
+    );
+  } else {
+    // Photo share — blue header, white body, one summary line, QR frame.
+    const qrDataUrl = await QRCode.toDataURL(`${siteUrl()}/bang-tin/${id}`, {
+      margin: 1,
+      width: 480,
+      errorCorrectionLevel: "M",
+      color: { dark: ACCENT, light: SURFACE },
+    });
+    const summary = item.summary_main || item.summary_time_location;
+
+    body = (
       <div
         style={{
           width,
           height,
           display: "flex",
           flexDirection: "column",
-          background: GROUND,
+          background: SURFACE,
           fontFamily: "Be Vietnam Pro",
         }}
       >
@@ -206,122 +221,91 @@ export async function GET(req: Request, { params }: Params) {
           }}
         >
           <Wordmark onAccent />
-          <div style={{ color: SURFACE, fontSize: 22, opacity: 0.9 }}>
-            Bảng tin tổ dân phố
+          <div style={{ color: SURFACE, fontSize: 24 }}>
+            {formatDate(item.created_at)}
           </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 28, padding: "40px 48px", flex: 1 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            {chips}
-            <div style={{ color: MUTED, fontSize: 22 }}>{formatDate(card.created_at)}</div>
-          </div>
-
-          <div
-            style={{
-              fontSize: 44,
-              fontWeight: 700,
-              color: TEXT,
-              lineHeight: 1.3,
-              display: "-webkit-box",
-              WebkitLineClamp: 5,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
-            {card.title}
-          </div>
-
-          <div style={{ flex: 1 }} />
-
-          <div style={{ display: "flex", justifyContent: "center" }}>{qrBlock}</div>
         </div>
 
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: ACCENT_SOFT,
-            borderTop: `2px solid ${ACCENT}`,
-            padding: "26px 48px",
-          }}
-        >
-          <div style={{ color: ACCENT_INK, fontSize: 26, fontWeight: 500 }}>
-            Trợ lý hỏi đáp 24/7
-          </div>
-        </div>
-      </div>
-    ) : (
-      // Landscape OG — link preview in Zalo / Messenger
-      <div
-        style={{
-          width,
-          height,
-          display: "flex",
-          background: GROUND,
-          fontFamily: "Be Vietnam Pro",
-        }}
-      >
-        <div
-          style={{
+            flex: 1,
             display: "flex",
             flexDirection: "column",
-            flex: 1,
-            padding: "44px 48px",
             gap: 24,
-            borderRight: `2px solid ${BORDER}`,
+            padding: "40px 48px",
+            minHeight: 0,
           }}
         >
-          <Wordmark />
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            {chips}
-            <div style={{ color: MUTED, fontSize: 22 }}>{formatDate(card.created_at)}</div>
-          </div>
+          {chips}
+
           <div
             style={{
               fontSize: 44,
               fontWeight: 700,
               color: TEXT,
               lineHeight: 1.3,
-              display: "-webkit-box",
-              WebkitLineClamp: 4,
-              WebkitBoxOrient: "vertical",
+              display: "block",
+              lineClamp: 3,
               overflow: "hidden",
             }}
           >
-            {card.title}
+            {item.title}
           </div>
-          <div style={{ flex: 1 }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+
+          <div style={{ height: 2, background: RULE }} />
+
+          {summary && (
             <div
               style={{
-                width: 12,
-                height: 12,
-                borderRadius: 999,
-                background: ACCENT,
+                fontSize: 26,
+                color: SUMMARY,
+                lineHeight: 1.45,
+                display: "block",
+                lineClamp: 3,
+                overflow: "hidden",
               }}
-            />
-            <div style={{ color: MUTED, fontSize: 20 }}>
-              {`Trợ lý hỏi đáp 24/7 · ${siteUrl().replace(/^https?:\/\//, "")}`}
+            >
+              {summary}
+            </div>
+          )}
+
+          <div style={{ flex: 1 }} />
+
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+                border: `2px solid ${ACCENT_TRACK}`,
+                borderRadius: 20,
+                padding: 20,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={qrDataUrl}
+                width={240}
+                height={240}
+                alt="Mã QR trỏ tới thông báo"
+              />
+              <div
+                style={{
+                  fontSize: 24,
+                  fontWeight: 700,
+                  color: ACCENT,
+                  textAlign: "center",
+                }}
+              >
+                Quét mã để nghe giọng đọc &amp; xem chi tiết
+              </div>
             </div>
           </div>
         </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 440,
-            background: ACCENT_SOFT,
-            padding: 32,
-          }}
-        >
-          {qrBlock}
-        </div>
       </div>
     );
+  }
 
   return new ImageResponse(body, {
     width,
