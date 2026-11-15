@@ -8,7 +8,9 @@ import { getPublishedAnnouncement, siteUrl } from "@/lib/announcements";
 type Params = { params: Promise<{ id: string }> };
 
 // docs/04 tokens + card-only inks
+const GROUND = "#f4f7fb";
 const SURFACE = "#ffffff";
+const BORDER = "#d7dee8";
 const RULE = "#e8edf3";
 const TEXT = "#0f172a";
 const MUTED = "#4b5563";
@@ -191,14 +193,15 @@ export async function GET(req: Request, { params }: Params) {
       </div>
     );
   } else {
-    // Photo share — blue header, white body, one summary line, QR frame.
+    // Photo share — ground canvas, 96px header, framed white card, QR row.
     const qrDataUrl = await QRCode.toDataURL(`${siteUrl()}/bang-tin/${id}`, {
       margin: 1,
       width: 480,
       errorCorrectionLevel: "M",
       color: { dark: ACCENT, light: SURFACE },
     });
-    const summary = item.summary_main || item.summary_time_location;
+    const summary = item.summary_main;
+    const timeLine = item.summary_time_location;
 
     body = (
       <div
@@ -207,17 +210,19 @@ export async function GET(req: Request, { params }: Params) {
           height,
           display: "flex",
           flexDirection: "column",
-          background: SURFACE,
+          background: GROUND,
           fontFamily: "Be Vietnam Pro",
         }}
       >
         <div
           style={{
+            height: 96,
+            flexShrink: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             background: ACCENT,
-            padding: "36px 48px",
+            padding: "0 48px",
           }}
         >
           <Wordmark onAccent />
@@ -229,75 +234,126 @@ export async function GET(req: Request, { params }: Params) {
         <div
           style={{
             flex: 1,
+            margin: 24,
+            padding: 36,
+            background: SURFACE,
+            border: `2px solid ${BORDER}`,
+            borderRadius: 24,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
-            gap: 24,
-            padding: "40px 48px",
+            justifyContent: "space-between",
             minHeight: 0,
           }}
         >
-          {chips}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {chips}
 
-          <div
-            style={{
-              fontSize: 44,
-              fontWeight: 700,
-              color: TEXT,
-              lineHeight: 1.3,
-              display: "block",
-              lineClamp: 3,
-              overflow: "hidden",
-            }}
-          >
-            {item.title}
-          </div>
-
-          <div style={{ height: 2, background: RULE }} />
-
-          {summary && (
             <div
               style={{
-                fontSize: 26,
-                color: SUMMARY,
-                lineHeight: 1.45,
+                marginTop: 16,
+                fontSize: 44,
+                fontWeight: 700,
+                color: TEXT,
+                lineHeight: 1.25,
                 display: "block",
                 lineClamp: 3,
                 overflow: "hidden",
               }}
             >
-              {summary}
+              {item.title}
             </div>
-          )}
 
-          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div
+              style={{ height: 1, background: RULE, margin: "20px 0" }}
+            />
+
+            {summary && (
+              <div
+                style={{
+                  fontSize: 26,
+                  color: SUMMARY,
+                  lineHeight: 1.45,
+                  display: "block",
+                }}
+              >
+                {summary}
+              </div>
+            )}
+
+            {timeLine && (
+              <div
+                style={{
+                  marginTop: 16,
+                  fontSize: 24,
+                  fontWeight: 500,
+                  color: ACCENT_INK,
+                  lineHeight: 1.4,
+                  display: "block",
+                  lineClamp: 2,
+                  overflow: "hidden",
+                }}
+              >
+                {`Thời gian & Địa điểm: ${timeLine}`}
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 24,
+              background: ACCENT_SOFT,
+              border: `2px solid ${ACCENT_TRACK}`,
+              borderRadius: 20,
+              padding: 20,
+            }}
+          >
             <div
               style={{
+                background: SURFACE,
+                padding: 10,
+                borderRadius: 12,
+                flexShrink: 0,
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 16,
-                border: `2px solid ${ACCENT_TRACK}`,
-                borderRadius: 20,
-                padding: 20,
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={qrDataUrl}
-                width={240}
-                height={240}
+                width={190}
+                height={190}
                 alt="Mã QR trỏ tới thông báo"
               />
+            </div>
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
               <div
                 style={{
                   fontSize: 24,
                   fontWeight: 700,
-                  color: ACCENT,
-                  textAlign: "center",
+                  color: ACCENT_INK,
+                  lineHeight: 1.3,
                 }}
               >
                 Quét mã để nghe giọng đọc &amp; xem chi tiết
+              </div>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 500,
+                  color: TEXT,
+                  lineHeight: 1.3,
+                }}
+              >
+                Một chạm quét mã – Cả tổ thông tin
               </div>
             </div>
           </div>

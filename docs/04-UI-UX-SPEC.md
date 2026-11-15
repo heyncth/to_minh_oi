@@ -358,7 +358,7 @@ Focus rings: 2px solid `--accent` + 2px offset, always visible on keyboard.
 | Apple touch | `public/icons/apple-touch-icon.png` | 180×180 |
 | OG / share | `public/og.jpg` | 1200×670 — wired in `layout.tsx` `openGraph` + `twitter` |
 | A5 QR standee (print template) | `public/print/a5-standee-qr.jpg` | 896×1200 — teal header + amber footer + white QR card; **template for A4 poster / other print** |
-| Share card (dynamic) | `GET /api/announcements/:id/card` | `variant=og` 1200×630 — minimal Zalo/Messenger preview: white + 16px accent rail, wordmark + chips, title 54px, no QR. `variant=share` 896×1200 — blue header, white body, title 44 + one summary line + QR 240 in `#cfe3f7` frame, CTA line; no footer bar. Be Vietnam Pro (`fonts/`), QR → `/bang-tin/:id` |
+| Share card (dynamic) | `GET /api/announcements/:id/card` | `variant=og` 1200×630 — minimal Zalo/Messenger preview: white + 16px accent rail, wordmark + chips, title 54px, no QR. `variant=share` 896×1200 — `--ground` canvas, 96px blue header, white card (2px `--border`, r24, margin 24): chips + title 44 + full summary + optional time/location line, QR row at card bottom (`--accent-soft` box, QR 190, CTA + locked slogan). Be Vietnam Pro (`fonts/`), QR → `/bang-tin/:id` |
 
 Print template language: dark teal bar + amber band + cream ground + white rounded QR card + double-line corner frame. Slogan under QR stays locked.
 
