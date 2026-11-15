@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tổ Mình Ơi
 
-## Getting Started
+Ứng dụng dân cư cho Phường Cẩm Lệ, Đà Nẵng: bảng tin tổ dân phố và trợ lý
+AI hỏi đáp. PWA miễn phí, giọng đọc tiếng Việt, thiết kế cho người lớn tuổi.
 
-First, run the development server:
+**Prod:** https://tominhoi.vercel.app
+
+## Stack
+
+Next.js 16 (App Router) · Supabase (Postgres + RLS) · Google Gemini · Vercel.
+Chi tiết: `docs/05-TECH-STACK.md`.
+
+## Chạy local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # điền khoá vào đây (không commit)
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Chất lượng: `npm run lint` · `npm run typecheck`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Seed dữ liệu (sau khi cấu hình env)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run seed:procedures
+npm run seed:announcements
+npm run embed:procedures    # embedding 768 chiều
+npm run generate:audio      # MP3 giọng đọc (Edge TTS)
+```
 
-## Learn More
+## Tài liệu
 
-To learn more about Next.js, take a look at the following resources:
+Bộ docs `docs/01` → `docs/09` là nguồn chuẩn cho hành vi sản phẩm.
+Luật cứng dành cho AI coding agent: `AGENTS.md`.
+Bắt đầu từ `docs/01-PRD.md`, phase hiện tại trong `docs/09-IMPLEMENTATION-PLAN.md`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cấu trúc
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/app        App Router — trang công khai, admin, API
+src/components UI (BottomNav, ChatPanel, NoticeCard, ShareSheet…)
+src/lib        Supabase, Gemini, RAG, helpers
+scripts/       seed, embed, generate audio, kiểm tra intent
+fonts/         Be Vietnam Pro .ttf (bắt buộc .ttf cho satori/OG card)
+```
