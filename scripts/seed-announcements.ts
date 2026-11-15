@@ -127,15 +127,8 @@ async function main() {
     if (!error) {
       createdBy = data.users.find((u) => u.email?.toLowerCase() === adminEmail.toLowerCase())?.id ?? null;
     }
-    if (createdBy) {
-      // RLS admin gate (docs/07 §5): register seeded admin in admin_users.
-      const { error: admErr } = await supabase
-        .from("admin_users")
-        .upsert({ id: createdBy }, { onConflict: "id", ignoreDuplicates: true });
-      if (admErr) console.error("admin_users upsert:", admErr.message);
-      else console.log(`admin_users: registered ${adminEmail}`);
-    } else {
-      console.error(`ADMIN_EMAIL ${adminEmail} not found — RLS admin policies stay closed`);
+    if (!createdBy) {
+      console.error(`ADMIN_EMAIL ${adminEmail} not found — seed rows will have no created_by`);
     }
   }
 
