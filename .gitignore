@@ -43,3 +43,7 @@ next-env.d.ts
 
 # video-demo skill install (not app source)
 .agents/
+
+# demo video build artifacts
+demo-out/
+public/demo-to-minh-oi.mp4

@@ -264,6 +264,7 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--card-radius);
   padding: var(--card-pad);
+  overflow-wrap: anywhere;
 }
 
 .btn {
@@ -349,6 +350,8 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
 }
 
 /* Admin login */
@@ -540,6 +543,7 @@ select {
   padding: 10px 14px;
   font-weight: 700;
   font-size: var(--meta-size);
+  overflow-wrap: anywhere;
 }
 
 .scam-card__reasons {
@@ -704,8 +708,8 @@ select {
 }
 
 .share-sheet__preview img {
-  max-width: 220px;
-  max-height: 280px;
+  max-width: 300px;
+  max-height: 420px;
   width: auto;
   height: auto;
   border-radius: var(--control-radius);

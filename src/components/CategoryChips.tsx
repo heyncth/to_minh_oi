@@ -12,12 +12,7 @@ export function CategoryChips({
   counts?: Partial<Record<CategoryFilter, number>>;
 }) {
   return (
-    <div
-      className="chip-row"
-      role="tablist"
-      aria-label="Danh mục tin"
-      style={{ flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4, marginBottom: 12 }}
-    >
+    <div className="chip-row" role="tablist" aria-label="Danh mục tin">
       {CATEGORIES.map((c) => {
         const selected = value === c;
         const n = counts?.[c];
