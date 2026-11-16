@@ -1,5 +1,5 @@
-import { AdminNoticeForm } from "@/components/AdminNoticeForm";
+import { AdminNoticeInput } from "@/components/AdminNoticeInput";
 
 export default function NewAnnouncementPage() {
-  return <AdminNoticeForm />;
+  return <AdminNoticeInput />;
 }

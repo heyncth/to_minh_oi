@@ -10,7 +10,7 @@ export type Announcement = {
   summary_time_location: string | null;
   summary_action_required: string | null;
   original_text: string | null;
-  original_image_url: string | null;
+  original_image_url: string[] | null;
   audio_url: string | null;
   created_at: string;
 };

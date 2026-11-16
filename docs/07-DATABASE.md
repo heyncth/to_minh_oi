@@ -21,7 +21,7 @@ erDiagram
         text summary_time_location
         text summary_action_required
         text original_text
-        text original_image_url
+        text_array original_image_url
         text audio_url
         uuid created_by
         timestamptz created_at
@@ -73,7 +73,7 @@ create table if not exists announcements (
   summary_time_location text,
   summary_action_required text,
   original_text text,
-  original_image_url text,
+  original_image_url text[],
   audio_url text,
   created_by uuid references auth.users(id),
   created_at timestamptz not null default timezone('utc', now()),
@@ -98,9 +98,11 @@ create index if not exists announcements_category_idx
 | `summary_time_location` | When & where |
 | `summary_action_required` | What residents must prepare/do |
 | `original_text` | Raw paste for “Xem nguyên văn” |
-| `original_image_url` | Public URL of scanned notice |
+| `original_image_url` | Public URLs of scanned notice images (`text[]`, max 5; migration `002_multi_image.sql`) |
 | `audio_url` | Pre-generated Edge TTS MP3 (nullable) |
 | `created_by` | Admin user id |
+
+Migrations: `001_init.sql` (base) → `002_multi_image.sql` (`original_image_url` text → `text[]`, old single URL wrapped in one-element array). Run in Supabase SQL editor or `supabase db push`.
 
 ### 3.2 `admin_procedures`
 

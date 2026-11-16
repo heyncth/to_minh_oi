@@ -97,29 +97,34 @@ onUnmount: speechSynthesis.cancel()
 iOS: only start inside click handler (already true).  
 Read **`summary_main` + optional time/location** — keep total speech short.
 
-### 4.3 Admin create/edit
+### 4.3 Admin create/edit (2-step wizard)
 
 ```text
-[textarea + file input — both always visible]
+[/admin/new — step 1: input]
+[textarea + multi-image grid — up to 5, each ≤ 2 MB]
         │
    ┌────┴────┐
    ▼         ▼
-Phân tích   Tạo thủ công → blank draft form
+Phân tích   Tạo thủ công
    │
    ▼
-  upload image (if any) → Storage URL
+  upload each pending image → Storage URLs
         │
         ▼
-  POST /api/summarize {text?, imageUrl?} → draft form
-  (form hidden until AI done or "Tạo thủ công")
+  overlay: 1 Tải ảnh → 2 AI phân tích → 3 Tạo nháp (honest ~10–20 s)
+  POST /api/summarize {text?, imageUrls?}
         │
-  admin edits
+  sessionStorage draft → /admin/draft (step 2)
+        │
+  admin edits (← back preserves input via sessionStorage)
         │
         ▼
-  POST /api/announcements (is_published toggle)
+  POST /api/announcements (is_published toggle) → clear sessionStorage → /admin
         │
         ▼
   POST /api/announcements/:id/audio (best-effort)
+
+[/admin/:id — edit] loads row via GET first, then PATCH (never blank)
 ```
 
 Hidden vs delete: `PATCH is_published=false` keeps history; `DELETE` removes row.
@@ -244,7 +249,7 @@ Client maps `level` → 🟢🟡🔴 card. Sample chips send canned strings (see
 
 ### 6.1 Input
 
-- `text` raw paste **or** `imageUrl` (already in Storage).
+- `text` raw paste **or** `imageUrls` (up to 5, already in Storage).
 
 ### 6.2 Prompt (single call)
 

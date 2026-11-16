@@ -17,9 +17,11 @@ export type AnnouncementInput = {
   summary_time_location: string | null;
   summary_action_required: string | null;
   original_text: string | null;
-  original_image_url: string | null;
+  original_image_url: string[] | null;
   audio_url: string | null;
 };
+
+const MAX_IMAGES = 5;
 
 function str(v: unknown, max: number, fallback = ""): string {
   if (typeof v !== "string") return fallback;
@@ -29,6 +31,15 @@ function str(v: unknown, max: number, fallback = ""): string {
 function nullableStr(v: unknown, max: number): string | null {
   if (typeof v !== "string" || v.trim() === "") return null;
   return v.slice(0, max);
+}
+
+function imageUrls(v: unknown): string[] | null {
+  if (!Array.isArray(v)) return null;
+  const urls = v
+    .filter((u): u is string => typeof u === "string" && u.trim() !== "")
+    .map((u) => u.slice(0, 2000))
+    .slice(0, MAX_IMAGES);
+  return urls.length > 0 ? urls : null;
 }
 
 function bool(v: unknown, fallback = false): boolean {
@@ -61,7 +72,7 @@ export function parseAnnouncement(body: unknown): { ok: true; data: Announcement
       summary_time_location: nullableStr(b.summary_time_location, 2000),
       summary_action_required: nullableStr(b.summary_action_required, 2000),
       original_text: nullableStr(b.original_text, 20000),
-      original_image_url: nullableStr(b.original_image_url, 2000),
+      original_image_url: imageUrls(b.original_image_url),
       audio_url: nullableStr(b.audio_url, 2000),
     },
   };
@@ -84,7 +95,7 @@ export function parseAnnouncementPatch(
   if ("summary_time_location" in b) data.summary_time_location = nullableStr(b.summary_time_location, 2000);
   if ("summary_action_required" in b) data.summary_action_required = nullableStr(b.summary_action_required, 2000);
   if ("original_text" in b) data.original_text = nullableStr(b.original_text, 20000);
-  if ("original_image_url" in b) data.original_image_url = nullableStr(b.original_image_url, 2000);
+  if ("original_image_url" in b) data.original_image_url = imageUrls(b.original_image_url);
   if ("audio_url" in b) data.audio_url = nullableStr(b.audio_url, 2000);
 
   if (Object.keys(data).length === 0) return { ok: false, error: "Không có trường nào để cập nhật." };

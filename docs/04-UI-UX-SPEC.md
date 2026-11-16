@@ -225,26 +225,50 @@ No “Đăng ký”. Footer: note “Tài khoản do phường cấp”.
 Table/list: title · category · status (Đã đăng / Ẩn) · updated · actions (Sửa / Ẩn / Hiện / Xóa / Nghe).  
 Primary: **+ Tin mới**.
 
-### 4.5 Admin editor (`/admin/new` or `/admin/:id`)
+### 4.5 Admin editor (2-step wizard)
+
+Routes: step 1 `/admin/new`, step 2 `/admin/draft` (draft kept in `sessionStorage`), edit `/admin/:id` (step 2 only).
 
 ```text
-[textarea: dán nội dung]  +  [file input: ảnh]     ← both always visible
-[Phân tích bằng AI]  [Tạo thủ công]                ← primary + ghost
+— Step 1 · /admin/new —
+① Nội dung → ② Kiểm tra & đăng          ← AdminSteps indicator
+[textarea: dán nội dung]  [Dán bộ nhớ tạm] [Điền mẫu thử]
 
-— Draft (hidden until AI done or "Tạo thủ công") —
+Ảnh thông báo                       0/5 ảnh
+┌ empty dropzone ─────────────────────────────┐
+│ 📷 Chạm để chọn ảnh hoặc chụp văn bản…     │
+│ Tối đa 5 ảnh · JPG/PNG/WebP · ≤ 2 MB/ảnh   │
+└─────────────────────────────────────────────┘
+  (when images: thumbnail grid 2-col mobile / 4-col desktop,
+   each tile has ✕, plus "＋ Thêm ảnh" tile, count summary)
+
+[Phân tích bằng AI]  [Tạo thủ công]
+
+— AI overlay (z-50, blocks double-submit) —
+◐ AI đang đọc và tóm tắt...
+  ✓/◐ Tải ảnh lên thư viện
+  ○/◐ AI phân tích và tóm tắt
+  ○  Tạo nháp 3 ý
+Khoảng 10–20 giây, cô/chú đợi chút ạ
+
+— Step 2 · /admin/draft —
+① Nội dung (tap = back) → ② Kiểm tra & đăng
+Ghi chú kiểm tra: …                    ← amber box if confidence_notes
 Tiêu đề [..............]
 Danh mục [select]  ☑ Khẩn cấp
 Tóm tắt chính [textarea]
 Thời gian & địa điểm [textarea]
 Cần làm gì [textarea]
-Nguyên văn [textarea collapsed]
-Ghi chú kiểm tra: …
+Nguyên văn [textarea]
 
-[☑ Đăng ngay]  [Lưu nháp]  [Tạo giọng đọc]
+[Đăng ngay]  [Lưu nháp]  [Tạo giọng đọc]
+
+— Edit · /admin/:id — loads row via GET (no blank form) —
 ```
 
+- Multi-image: max 5, each ≤ 2 MB, JPG/PNG/WebP; client uploads one file per request, then `POST /api/summarize {text?, imageUrls?}`.
 - Confidence notes: amber soft box `#fffbeb` / `--warning` text.
-- Publish success: toast “Đã đăng tin”.
+- Publish success: toast “Đã đăng tin” → clears sessionStorage → `/admin`.
 - Audio fail: warning toast; stay on page.
 
 ### 4.6 Font scale control
@@ -273,7 +297,9 @@ Copy line optional: **“Một chạm quét mã – Cả tổ thông tin”** on
 | `ChatBubble` | user/assistant |
 | `ScamResultCard` | 3-level |
 | `SuggestionChips` | rag + scam groups |
-| `AdminNoticeForm` | draft fields |
+| `AdminNoticeInput` | Step 1: textarea + multi-image grid |
+| `AdminNoticeForm` | Step 2: draft fields |
+| `AdminSteps` | ① Nội dung → ② Kiểm tra & đăng |
 | `Toast` | success/error/warn |
 | `EmptyState` | per screen |
 | `ErrorRetry` | network/API |

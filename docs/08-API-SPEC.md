@@ -158,21 +158,23 @@ Expected levels are for demo UX, not hard assertions (model may return `caution`
 
 ## 4. `POST /api/summarize` (Admin)
 
-Turn pasted text **or** image into announcement draft fields.
+Turn pasted text **or** images into announcement draft fields.
 
 ### Request
 
 ```json
 {
   "text": "…optional raw text…",
-  "imageUrl": "https://…supabase…/announcements/images/….jpg"
+  "imageUrls": [
+    "https://…supabase…/announcements/images/….jpg"
+  ]
 }
 ```
 
-- At least one of `text` or `imageUrl`.
-- Image already uploaded to Storage by client **before** this call (simpler auth + size limits at upload).
-- `imageUrl` must be a public URL under the project's `announcements` Storage bucket; any other host is rejected (`bad_request`, SSRF guard).
-- Max text: 20 000 chars. Max image: 2 MB (enforced at upload).
+- At least one of `text` or `imageUrls` (array, max **5**).
+- Images already uploaded to Storage by client **before** this call (simpler auth + size limits at upload). Client uploads one file per `POST /api/upload` request, then passes all URLs here.
+- Each URL must be a public URL under the project's `announcements` Storage bucket; any other host is rejected (`bad_request`, SSRF guard).
+- Max text: 20 000 chars. Each image: 2 MB (enforced at upload). 5 × 2 MB base64 stays under Gemini's 20 MB request limit.
 
 ### Response
 
@@ -261,10 +263,12 @@ Optional: `includeOriginal: true` only when user expands — v1 may return `orig
   "summary_time_location": "…",
   "summary_action_required": "…",
   "original_text": "…",
-  "original_image_url": "…",
+  "original_image_url": ["https://…/images/a.jpg", "https://…/images/b.jpg"],
   "audio_url": null
 }
 ```
+
+`original_image_url`: `string[] | null` — max 5 public Storage URLs (migration `002_multi_image`).
 
 Response: created row with `id`, `created_at`, `updated_at`.
 
@@ -369,8 +373,8 @@ POST /api/chat
 
 ```
 1. Session cookie present
-2. Client uploads image → Storage → url
-3. POST /api/summarize { "imageUrl": url } → draft fields
+2. Client uploads each image (≤5) → Storage → urls
+3. POST /api/summarize { "imageUrls": [urls] } → draft fields
 4. Admin edits → POST /api/announcements { …, "is_published": true }
 5. POST /api/announcements/{id}/audio → audio_url
 6. GET /api/announcements → list includes new item

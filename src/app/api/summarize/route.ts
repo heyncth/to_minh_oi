@@ -4,7 +4,12 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { parseJsonObject } from "@/lib/intent";
 import { SUMMARIZE_PROMPT } from "@/lib/prompts";
 
-type Body = { text?: string; imageUrl?: string };
+type Body = { text?: string; imageUrls?: string[] };
+
+const MAX_IMAGES = 5;
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+// SSRF guard: only our own public Storage images, never arbitrary URLs.
+const STORAGE_PREFIX = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/announcements/`;
 
 export async function POST(req: Request) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -25,9 +30,11 @@ export async function POST(req: Request) {
 
   const body = (await req.json().catch(() => null)) as Body | null;
   const text = typeof body?.text === "string" ? body.text.slice(0, 20_000) : "";
-  const imageUrl = typeof body?.imageUrl === "string" ? body.imageUrl.slice(0, 2000) : "";
+  const imageUrls = Array.isArray(body?.imageUrls)
+    ? body.imageUrls.filter((u): u is string => typeof u === "string").slice(0, MAX_IMAGES)
+    : [];
 
-  if (!text.trim() && !imageUrl.trim()) {
+  if (!text.trim() && imageUrls.length === 0) {
     return NextResponse.json(
       { error: { code: "bad_request", message: "Cần dán văn bản hoặc tải ảnh thông báo." } },
       { status: 400 },
@@ -44,10 +51,8 @@ export async function POST(req: Request) {
       parts.push({ text: `SOURCE:\n${text}` });
     }
 
-    if (imageUrl.trim()) {
-      // SSRF guard: only our own public Storage images, never arbitrary URLs.
-      const storagePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/announcements/`;
-      if (!imageUrl.startsWith(storagePrefix)) {
+    for (const imageUrl of imageUrls) {
+      if (!imageUrl.startsWith(STORAGE_PREFIX)) {
         return NextResponse.json(
           { error: { code: "bad_request", message: "Ảnh phải nằm trong thư viện ảnh của phường." } },
           { status: 400 },
@@ -56,7 +61,7 @@ export async function POST(req: Request) {
       const imgRes = await fetch(imageUrl);
       if (!imgRes.ok) throw new Error("image fetch failed");
       const buf = Buffer.from(await imgRes.arrayBuffer());
-      if (buf.length > 2 * 1024 * 1024) {
+      if (buf.length > MAX_IMAGE_BYTES) {
         return NextResponse.json(
           { error: { code: "payload_too_large", message: "Ảnh lớn hơn 2 MB." } },
           { status: 413 },
@@ -64,7 +69,9 @@ export async function POST(req: Request) {
       }
       const mime = imgRes.headers.get("content-type") || "image/jpeg";
       parts.push({ inlineData: { mimeType: mime, data: buf.toString("base64") } });
-      parts.push({ text: "SOURCE is the image above (and text if any)." });
+    }
+    if (imageUrls.length > 0) {
+      parts.push({ text: "SOURCE includes the images above (and text if any)." });
     }
 
     const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";

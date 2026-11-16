@@ -101,14 +101,15 @@ export function NoticeCard({ item }: { item: Announcement }) {
         </div>
       )}
 
-      {item.original_image_url && (
+      {(item.original_image_url ?? []).map((url) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={item.original_image_url}
+          key={url}
+          src={url}
           alt={item.title || "Ảnh thông báo"}
           style={{ width: "100%", borderRadius: "var(--control-radius)", border: "1px solid var(--border)" }}
         />
-      )}
+      ))}
 
       <ShareSheet open={shareOpen} onClose={() => setShareOpen(false)} id={item.id} />
     </article>
