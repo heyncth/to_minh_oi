@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { RAG_CHIPS, SCAM_SAMPLES } from "@/lib/chat-samples";
+import { RAG_CHIPS } from "@/lib/chat-samples";
 import { IconLevelDot, IconMic } from "./Icons";
 
 type Role = "user" | "assistant";
@@ -117,7 +117,7 @@ export function ChatPanel() {
   const [hydrated, setHydrated] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const [micSupported, setMicSupported] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
   const recRef = useRef<{ stop: () => void } | null>(null);
 
   useEffect(() => {
@@ -136,8 +136,30 @@ export function ChatPanel() {
 
   useEffect(() => {
     if (hydrated) saveStored(turns);
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const log = logRef.current;
+    if (log) log.scrollTo({ top: log.scrollHeight, behavior: "smooth" });
   }, [turns, hydrated]);
+
+  // iOS keyboard: visual viewport pans/resizes without touching layout viewport —
+  // feed shell height/top so composer rides the keyboard.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const sync = () => {
+      const s = document.documentElement.style;
+      s.setProperty("--chat-vvh", `${vv.height}px`);
+      s.setProperty("--chat-vtop", `${vv.offsetTop}px`);
+    };
+    sync();
+    vv.addEventListener("resize", sync);
+    vv.addEventListener("scroll", sync);
+    return () => {
+      vv.removeEventListener("resize", sync);
+      vv.removeEventListener("scroll", sync);
+      document.documentElement.style.removeProperty("--chat-vvh");
+      document.documentElement.style.removeProperty("--chat-vtop");
+    };
+  }, []);
 
   async function send(raw: string, opts?: { retryOf?: string }) {
     const message = raw.trim();
@@ -284,26 +306,11 @@ export function ChatPanel() {
               </button>
             ))}
           </div>
-
-          <p className="section-label">Thử mẫu lừa đảo</p>
-          <div className="chip-row">
-            {SCAM_SAMPLES.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                className="chip"
-                disabled={busy}
-                onClick={() => void send(s.body)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
         </>
       )}
 
       {hydrated && turns.length > 0 && (
-        <div className="chat__log" aria-live="polite">
+        <div ref={logRef} className="chat__log" aria-live="polite">
           {turns.map((t) => (
             <div key={t.id} className={`chat__row chat__row--${t.role}`}>
               {t.role === "user" ? (
@@ -340,7 +347,6 @@ export function ChatPanel() {
               </div>
             </div>
           )}
-          <div ref={bottomRef} />
         </div>
       )}
 

@@ -171,14 +171,11 @@ Then:
 ```text
 Gửi câu hỏi
 [ Làm giấy khai sinh cần gì? ] [ Xác nhận cư trú ở đâu? ] …  (≥4 chips)
-
-Thử mẫu lừa đảo
-[ Mẫu 1: OTP khóa tài khoản ] [ Mẫu 2: Cài APK ] [ Mẫu 3: Trúng thưởng ]
 ```
 
 Section labels: 14–15px `--muted` (not slogans). Chips: `--surface` + border, 48px min height, full width wrap or horizontal scroll.
 
-**Composer (fixed above bottom nav):**
+**Composer (docked bottom of chat pane, above bottom nav):**
 
 ```text
 ┌──────────────────────────────────────────┐
@@ -186,6 +183,7 @@ Section labels: 14–15px `--muted` (not slogans). Chips: `--surface` + border, 
 └──────────────────────────────────────────┘
 ```
 
+- Chat page locks to viewport (`100dvh` + `visualViewport` for mobile keyboard); only `.chat__log` scrolls — composer and bottom nav never move.
 - Send: filled accent, 48px.
 - Mic: 48px icon; hidden if unsupported.
 - Optional **Xóa hội thoại** text button in header.

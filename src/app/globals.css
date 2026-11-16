@@ -454,12 +454,46 @@ select {
   }
 }
 
-/* Chat (Trợ lý) */
+/* Chat (Trợ lý) — full-viewport pane: only .chat__log scrolls.
+   Heights come from flex + same vars as .bottom-nav; never subtract <h1> by hand. */
+html:has(.chat),
+body:has(.chat) {
+  overflow: hidden;
+  height: 100%;
+}
+
+.app-shell:has(.chat) {
+  position: fixed;
+  top: var(--chat-vtop, 0px);
+  left: 0;
+  width: 100%;
+  height: var(--chat-vvh, 100dvh);
+  min-height: 0; /* else base min-height:100dvh blocks keyboard shrink */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell:has(.chat) .bottom-nav {
+  position: static;
+  flex-shrink: 0;
+}
+
+.app-shell:has(.chat) .app-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--page-pad);
+  overflow: hidden;
+}
+
 .chat {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: calc(100dvh - var(--topbar-h) - var(--bottomnav-h) - 120px);
+  flex: 1;
+  min-height: 0;
 }
 
 .chat__header {
@@ -482,7 +516,17 @@ select {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding-bottom: 8px;
+}
+
+/* short chat hugs composer (avoid justify-content:flex-end top-clip bug) */
+.chat__log::before {
+  content: "";
+  margin-top: auto;
 }
 
 .chat__row {
@@ -579,8 +623,9 @@ select {
 }
 
 .chat__composer {
-  position: sticky;
-  bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  flex-shrink: 0;
+  /* empty state: no .chat__log, pin composer to bottom; log's flex:1 wins when present */
+  margin-top: auto;
   z-index: 30;
   display: flex;
   gap: 8px;

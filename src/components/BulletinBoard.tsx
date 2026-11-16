@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CategoryChips } from "@/components/CategoryChips";
 import { NoticeCard } from "@/components/NoticeCard";
 import type { Announcement, CategoryFilter } from "@/lib/types";
@@ -11,11 +11,12 @@ export function BulletinBoard() {
   const [category, setCategory] = useState<CategoryFilter>("Tất cả");
   const [retryToken, setRetryToken] = useState(0);
 
+  // One fetch of the full list; counts + category filter derive client-side
+  // (docs/06-TDD.md §filter). Counts stay visible on every chip.
   useEffect(() => {
     let cancelled = false;
 
-    const qs = category === "Tất cả" ? "" : `?category=${encodeURIComponent(category)}`;
-    fetch(`/api/announcements${qs}`)
+    fetch(`/api/announcements?limit=50`)
       .then(async (r) => {
         const body = await r.json();
         if (!r.ok) throw new Error(body?.error?.message ?? "Không tải được bảng tin.");
@@ -34,23 +35,25 @@ export function BulletinBoard() {
     return () => {
       cancelled = true;
     };
-  }, [category, retryToken]);
+  }, [retryToken]);
 
-  const counts: Partial<Record<CategoryFilter, number>> = {};
-  if (items) {
-    counts["Tất cả"] = items.length;
-    // counts only meaningful on Tất cả view; skip when filtered
-    if (category === "Tất cả") {
-      for (const a of items) {
-        const c = a.category as CategoryFilter;
-        counts[c] = (counts[c] ?? 0) + 1;
-      }
+  const counts = useMemo(() => {
+    const c: Partial<Record<CategoryFilter, number>> = { "Tất cả": items?.length ?? 0 };
+    for (const a of items ?? []) {
+      const k = a.category as CategoryFilter;
+      c[k] = (c[k] ?? 0) + 1;
     }
-  }
+    return c;
+  }, [items]);
+
+  const visible = useMemo(() => {
+    if (items === null) return null;
+    return category === "Tất cả" ? items : items.filter((a) => a.category === category);
+  }, [items, category]);
 
   return (
     <>
-      <CategoryChips value={category} onChange={setCategory} counts={category === "Tất cả" ? counts : undefined} />
+      <CategoryChips value={category} onChange={setCategory} counts={counts} />
 
       {error && (
         <div className="card" role="alert" style={{ borderColor: "var(--negative)" }}>
@@ -69,15 +72,15 @@ export function BulletinBoard() {
         </div>
       )}
 
-      {items !== null && items.length === 0 && !error && (
+      {visible !== null && items !== null && visible.length === 0 && !error && (
         <div className="empty-state">
           <p style={{ fontWeight: 600, color: "var(--text)" }}>Chưa có tin mới</p>
         </div>
       )}
 
-      {items && items.length > 0 && (
+      {visible && visible.length > 0 && (
         <div style={{ display: "grid", gap: 12 }}>
-          {items.map((a) => (
+          {visible.map((a) => (
             <NoticeCard key={a.id} item={a} />
           ))}
         </div>

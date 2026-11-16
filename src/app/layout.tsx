@@ -44,6 +44,8 @@ export const viewport: Viewport = {
   themeColor: "#0b5cab",
   width: "device-width",
   initialScale: 1,
+  // Android keyboard resizes layout viewport → chat shell follows 100dvh
+  interactiveWidget: "resizes-content",
 };
 
 // Apply saved font-scale before first paint (no flash).
