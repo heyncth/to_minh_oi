@@ -232,9 +232,9 @@ Routes: step 1 `/admin/new`, step 2 `/admin/draft` (draft kept in `sessionStorag
 ```text
 — Step 1 · /admin/new —
 ① Nội dung → ② Kiểm tra & đăng          ← AdminSteps indicator
-[textarea: dán nội dung]  [Dán bộ nhớ tạm] [Điền mẫu thử]
+[textarea: dán nội dung]
 
-Ảnh thông báo                       0/5 ảnh
+Ảnh tài liệu                        0/5 ảnh
 ┌ empty dropzone ─────────────────────────────┐
 │ 📷 Chạm để chọn ảnh hoặc chụp văn bản…     │
 │ Tối đa 5 ảnh · JPG/PNG/WebP · ≤ 2 MB/ảnh   │
@@ -253,6 +253,7 @@ Khoảng 10–20 giây, cô/chú đợi chút ạ
 
 — Step 2 · /admin/draft —
 ① Nội dung (tap = back) → ② Kiểm tra & đăng
+[← Quay lại]                           ← explicit back to step 1
 Ghi chú kiểm tra: …                    ← amber box if confidence_notes
 Tiêu đề [..............]
 Danh mục [select]  ☑ Khẩn cấp

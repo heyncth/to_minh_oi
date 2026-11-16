@@ -13,20 +13,6 @@ import {
   type AdminDraft,
 } from "@/lib/admin-draft";
 
-const SAMPLE_TEXT = `THÔNG BÁO TIÊM CHỦNG MÙA XUÂN
-
-Kính gửi các hộ dân tổ 2, 3, 4 phường Cẩm Lệ!
-
-Trạm Y tế phường tổ chức tiêm phòng sởi – rubella cho trẻ em từ 12 tháng đến 5 tuổi.
-
-Thời gian: 8h00 – 11h00, thứ Bảy ngày 22/11/2026
-Địa điểm: Trạm Y tế phường Cẩm Lệ, số 12 Lê Quý Đôn
-Đối tượng: Trẻ em trong độ tuổi, mang theo sổ tiêm chủng
-
-Phụ huynh cho trẻ ăn no trước khi tiêm. Miễn phí toàn bộ. Liên hệ 02363 888888 nếu trẻ đang sốt hoặc bị cảm để được hoãn lịch.
-
-UBND phường Cẩm Lệ`;
-
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_IMAGES = 5;
@@ -109,28 +95,6 @@ export function AdminNoticeInput() {
     setRemoteUrls((cur) => cur.filter((_, idx) => idx !== i));
   }
 
-  async function pasteClipboard() {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (!text.trim()) {
-        setToast({ kind: "err", msg: "Bộ nhớ tạm đang trống." });
-        return;
-      }
-      setRawText((prev) => (prev ? `${prev}\n${text}` : text));
-      setToast(null);
-    } catch {
-      setToast({
-        kind: "err",
-        msg: "Trình duyệt chặn đọc bộ nhớ tạm — cô/chú nhấn giữ ô nhập rồi chọn Dán nhé.",
-      });
-    }
-  }
-
-  function fillSample() {
-    setRawText(SAMPLE_TEXT);
-    setToast(null);
-  }
-
   async function analyze() {
     if (!rawText.trim() && totalImages === 0) {
       setToast({ kind: "err", msg: "Dán nội dung hoặc chọn ảnh thông báo trước." });
@@ -207,10 +171,6 @@ export function AdminNoticeInput() {
 
       <AdminSteps step={1} />
 
-      <p className="admin-guide">
-        Dán nội dung thông báo từ Zalo hoặc tải ảnh chụp văn bản giấy để AI tự động tóm tắt thành 3 ý dễ đọc.
-      </p>
-
       {toast && (
         <div
           className="card"
@@ -230,14 +190,6 @@ export function AdminNoticeInput() {
         <label style={{ ...labelStyle, marginBottom: 0 }} htmlFor="f-raw">
           Nội dung thông báo
         </label>
-        <div className="admin-tools">
-          <button type="button" className="btn btn--ghost" onClick={() => void pasteClipboard()} disabled={analyzing}>
-            Dán từ bộ nhớ tạm
-          </button>
-          <button type="button" className="btn btn--ghost" onClick={fillSample} disabled={analyzing}>
-            Điền mẫu thử
-          </button>
-        </div>
       </div>
       <textarea
         id="f-raw"
@@ -249,7 +201,7 @@ export function AdminNoticeInput() {
       />
 
       <div className="admin-field__row">
-        <span style={labelStyle}>Ảnh thông báo</span>
+        <span style={labelStyle}>Ảnh tài liệu</span>
         <span style={{ fontSize: "var(--meta-size)", color: "var(--muted)" }}>
           {totalImages}/{MAX_IMAGES} ảnh
         </span>

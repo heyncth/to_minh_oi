@@ -159,7 +159,17 @@ export function AdminNoticeForm({
       {initialId ? (
         <p className="admin-guide">Chỉnh sửa nội dung tin rồi đăng lại cho cư dân.</p>
       ) : (
-        <AdminSteps step={2} onBack={() => router.push("/admin/new")} />
+        <>
+          <AdminSteps step={2} onBack={() => router.push("/admin/new")} />
+          <button
+            type="button"
+            className="btn btn--ghost"
+            style={{ marginBottom: 16 }}
+            onClick={() => router.push("/admin/new")}
+          >
+            ← Quay lại
+          </button>
+        </>
       )}
 
       {toast && (
