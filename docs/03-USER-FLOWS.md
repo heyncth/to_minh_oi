@@ -162,9 +162,9 @@ sequenceDiagram
 
 ## F6 · Admin: photo → publish
 
-1. Login → New notice → **Tải ảnh**.  
+1. Login → New notice → paste text and/or choose photo (single combined input).  
 2. Client validates size/type → `storage.upload` → public URL.  
-3. `POST /api/summarize {imageUrl}` → draft (Gemini vision OCR).  
+3. `POST /api/summarize {text?, imageUrl?}` → draft (Gemini vision OCR).  
 4. Unreadable → VI error “thử ảnh rõ hơn hoặc dán văn bản”.  
 5. Continue as F5 from edit step.
 

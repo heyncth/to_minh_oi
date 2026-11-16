@@ -228,11 +228,10 @@ Primary: **+ Tin mới**.
 ### 4.5 Admin editor (`/admin/new` or `/admin/:id`)
 
 ```text
-Mode: (•) Dán văn bản   ( ) Tải ảnh
-[textarea or file input]
-[Phân tích bằng AI]     ← primary
+[textarea: dán nội dung]  +  [file input: ảnh]     ← both always visible
+[Phân tích bằng AI]  [Tạo thủ công]                ← primary + ghost
 
-— Draft (AI filled) —
+— Draft (hidden until AI done or "Tạo thủ công") —
 Tiêu đề [..............]
 Danh mục [select]  ☑ Khẩn cấp
 Tóm tắt chính [textarea]

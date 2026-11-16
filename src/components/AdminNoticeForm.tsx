@@ -33,7 +33,9 @@ const EMPTY: Draft = {
 
 export function AdminNoticeForm({ initialId }: { initialId?: string }) {
   const router = useRouter();
-  const [mode, setMode] = useState<"text" | "image">("text");
+  // New notice: draft card hidden until AI finishes or "Tạo thủ công".
+  // Edit: card visible immediately.
+  const [showForm, setShowForm] = useState(Boolean(initialId));
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [rawText, setRawText] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -47,13 +49,16 @@ export function AdminNoticeForm({ initialId }: { initialId?: string }) {
   }
 
   async function analyze() {
+    if (!rawText.trim() && !file) {
+      setToast({ kind: "err", msg: "Dán nội dung hoặc chọn ảnh thông báo trước." });
+      return;
+    }
     setBusy("analyze");
     setToast(null);
     setConfidence(null);
     try {
       let imageUrl: string | undefined;
-      if (mode === "image") {
-        if (!file) throw new Error("Chọn ảnh thông báo trước.");
+      if (file) {
         setBusy("upload");
         const fd = new FormData();
         fd.append("file", file);
@@ -67,9 +72,7 @@ export function AdminNoticeForm({ initialId }: { initialId?: string }) {
       const res = await fetch("/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          mode === "text" ? { text: rawText } : { imageUrl, text: rawText || undefined },
-        ),
+        body: JSON.stringify({ text: rawText.trim() || undefined, imageUrl }),
       });
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error?.message ?? "Phân tích thất bại.");
@@ -87,12 +90,20 @@ export function AdminNoticeForm({ initialId }: { initialId?: string }) {
         confidence_notes: body.confidence_notes || "",
       });
       setConfidence(body.confidence_notes || null);
+      setShowForm(true);
       setToast({ kind: "ok", msg: "Đã tạo nháp từ AI — kiểm tra trước khi đăng." });
     } catch (e) {
       setToast({ kind: "err", msg: e instanceof Error ? e.message : "Phân tích thất bại." });
     } finally {
       setBusy(null);
     }
+  }
+
+  function manualDraft() {
+    setDraft({ ...EMPTY, original_text: rawText });
+    setConfidence(null);
+    setToast(null);
+    setShowForm(true);
   }
 
   async function save(publish: boolean) {
@@ -202,48 +213,48 @@ export function AdminNoticeForm({ initialId }: { initialId?: string }) {
         </div>
       )}
 
-      <fieldset style={{ border: "none", marginBottom: 12, display: "flex", gap: 16 }}>
-        <label style={{ display: "flex", gap: 8, alignItems: "center", minHeight: 48 }}>
-          <input type="radio" checked={mode === "text"} onChange={() => setMode("text")} />
-          Dán văn bản
-        </label>
-        <label style={{ display: "flex", gap: 8, alignItems: "center", minHeight: 48 }}>
-          <input type="radio" checked={mode === "image"} onChange={() => setMode("image")} />
-          Tải ảnh
-        </label>
-      </fieldset>
+      <textarea
+        value={rawText}
+        onChange={(e) => setRawText(e.target.value)}
+        placeholder="Dán nội dung thông báo…"
+        rows={6}
+        style={{ ...input, resize: "vertical" }}
+      />
 
-      {mode === "text" ? (
-        <textarea
-          value={rawText}
-          onChange={(e) => setRawText(e.target.value)}
-          placeholder="Dán nội dung thông báo…"
-          rows={6}
-          style={{ ...input, resize: "vertical" }}
+      <div style={{ marginBottom: 12 }}>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          style={{ ...input, padding: 12 }}
         />
-      ) : (
-        <div style={{ marginBottom: 12 }}>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            style={{ ...input, padding: 12 }}
-          />
-          <p style={{ fontSize: "var(--meta-size)", color: "var(--muted)" }}>JPG/PNG/WebP · tối đa 2 MB</p>
-        </div>
-      )}
+        <p style={{ fontSize: "var(--meta-size)", color: "var(--muted)" }}>
+          JPG/PNG/WebP · tối đa 2 MB · có thể vừa dán chữ vừa chọn ảnh
+        </p>
+      </div>
 
-      <button
-        type="button"
-        className="btn btn--primary btn--block"
-        onClick={() => void analyze()}
-        disabled={busy !== null}
-        style={{ marginBottom: 20 }}
-      >
-        {busy === "upload" ? "Đang tải ảnh…" : busy === "analyze" ? "Đang phân tích…" : "Phân tích bằng AI"}
-      </button>
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={() => void analyze()}
+          disabled={busy !== null}
+        >
+          {busy === "upload" ? "Đang tải ảnh…" : busy === "analyze" ? "Đang phân tích…" : "Phân tích bằng AI"}
+        </button>
+        <button
+          type="button"
+          className="btn btn--ghost"
+          onClick={manualDraft}
+          disabled={busy !== null}
+        >
+          Tạo thủ công
+        </button>
+      </div>
 
+      {showForm && (
+        <>
       {confidence && (
         <div
           className="card"
@@ -308,6 +319,8 @@ export function AdminNoticeForm({ initialId }: { initialId?: string }) {
       <p style={{ marginTop: 12, fontSize: "var(--meta-size)", color: "var(--muted)" }}>
         Đăng = hiện trên bảng tin cư dân. Lưu nháp = chỉ admin thấy (ẩn).
       </p>
+        </>
+      )}
     </div>
   );
 }

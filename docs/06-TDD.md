@@ -100,13 +100,18 @@ Read **`summary_main` + optional time/location** — keep total speech short.
 ### 4.3 Admin create/edit
 
 ```text
-[Mode toggle: Dán văn bản | Tải ảnh]
+[textarea + file input — both always visible]
         │
-        ▼
+   ┌────┴────┐
+   ▼         ▼
+Phân tích   Tạo thủ công → blank draft form
+   │
+   ▼
   upload image (if any) → Storage URL
         │
         ▼
-  POST /api/summarize → draft form (title, category, urgent, 3 summaries)
+  POST /api/summarize {text?, imageUrl?} → draft form
+  (form hidden until AI done or "Tạo thủ công")
         │
   admin edits
         │
