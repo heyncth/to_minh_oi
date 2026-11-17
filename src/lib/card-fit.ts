@@ -79,22 +79,34 @@ const CHIP_H = 40;
 const TITLE_MT = 16;
 const RULE_H = 41; // 1px rule + 20px margins each side
 const TL_MT = 16;
+const PILL_H = 38; // label pill: 22px text + 6px padding ×2 + line box
+const TL_GAP = 8; // pill → content
 const QR_ROW_H = 254; // padding 40 + border 4 + QR box (190 img + 20 padding)
-const GAP = 24;
+const GAP = 40; // breathing room above the QR row
 /** Inner height: canvas 1200 − header 96 − margins 48 − padding 72, minus QR row and gap. */
 export const FIT = 1200 - 96 - 48 - 72 - QR_ROW_H - GAP;
 
+// Size caps keep the hierarchy: title leads, body fills, neither explodes.
+const TITLE_MAX = 56;
+const SUMMARY_MAX = 34;
+const TL_MAX = 30;
+
+export const titleSize = (k: number) => Math.min(Math.round(44 * k), TITLE_MAX);
+export const summarySize = (k: number) => Math.min(Math.round(26 * k), SUMMARY_MAX);
+export const tlSize = (k: number) => Math.min(Math.round(24 * k), TL_MAX);
+
 export async function topHeight(k: number, parts: Parts): Promise<number> {
   const fonts = await loadFitFonts();
-  const t = 44 * k;
-  const s = 26 * k;
-  const l = 24 * k;
+  const t = titleSize(k);
+  const s = summarySize(k);
+  const l = tlSize(k);
   let h = CHIP_H + TITLE_MT;
-  h += Math.min(wrapLines(fonts[700], parts.title, t, TEXT_W), 3) * t * 1.25;
+  h += Math.min(wrapLines(fonts[700], parts.title, t, TEXT_W), 3) * t * 1.18;
   h += RULE_H;
   if (parts.summary) h += wrapLines(fonts[400], parts.summary, s, TEXT_W) * s * 1.45;
   if (parts.timeLine) {
-    h += TL_MT + Math.min(wrapLines(fonts[500], parts.timeLine, l, TEXT_W), 3) * l * 1.4;
+    h += TL_MT + PILL_H + TL_GAP;
+    h += Math.min(wrapLines(fonts[400], parts.timeLine, l, TEXT_W), 4) * l * 1.4;
   }
   return h;
 }

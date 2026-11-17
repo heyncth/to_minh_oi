@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import QRCode from "qrcode";
 import { getPublishedAnnouncement, siteUrl } from "@/lib/announcements";
-import { fitScale } from "@/lib/card-fit";
+import { fitScale, summarySize, titleSize, tlSize } from "@/lib/card-fit";
 import { formatDate } from "@/lib/format";
 
 type Params = { params: Promise<{ id: string }> };
@@ -20,7 +20,8 @@ const SUMMARY = "#334155";
 const ACCENT = "#0b5cab";
 const ACCENT_SOFT = "#e8f1fb";
 const ACCENT_INK = "#083d75";
-const ACCENT_TRACK = "#cfe3f7";
+// card-only: QR frame needs more bite than the soft track color
+const QR_BORDER = "#8ec1f0";
 const URGENT_BG = "#ffe4e6";
 const URGENT_INK = "#9f1239";
 
@@ -215,9 +216,6 @@ export async function GET(req: Request, { params }: Params) {
     // Fill leftover height: scale title/body until the top block meets the QR
     // row (space-between otherwise leaves a hole). QR stays fixed.
     const k = await fitScale({ title: item.title, summary, timeLine });
-    const titleFs = Math.round(44 * k);
-    const summaryFs = Math.round(26 * k);
-    const timeFs = Math.round(24 * k);
 
     body = (
       <div
@@ -267,10 +265,10 @@ export async function GET(req: Request, { params }: Params) {
             <div
               style={{
                 marginTop: 16,
-                fontSize: titleFs,
+                fontSize: titleSize(k),
                 fontWeight: 700,
                 color: TEXT,
-                lineHeight: 1.25,
+                lineHeight: 1.18,
                 display: "block",
                 lineClamp: 3,
                 overflow: "hidden",
@@ -286,7 +284,7 @@ export async function GET(req: Request, { params }: Params) {
             {summary && (
               <div
                 style={{
-                  fontSize: summaryFs,
+                  fontSize: summarySize(k),
                   color: SUMMARY,
                   lineHeight: 1.45,
                   display: "block",
@@ -300,16 +298,37 @@ export async function GET(req: Request, { params }: Params) {
               <div
                 style={{
                   marginTop: 16,
-                  fontSize: timeFs,
-                  fontWeight: 500,
-                  color: ACCENT_INK,
-                  lineHeight: 1.4,
-                  display: "block",
-                  lineClamp: 3,
-                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                  alignItems: "flex-start",
                 }}
               >
-                {`Thời gian & Địa điểm: ${timeLine}`}
+                <div
+                  style={{
+                    background: ACCENT_SOFT,
+                    color: ACCENT_INK,
+                    borderRadius: 999,
+                    padding: "6px 16px",
+                    fontSize: 22,
+                    fontWeight: 700,
+                  }}
+                >
+                  Thời gian &amp; Địa điểm
+                </div>
+                <div
+                  style={{
+                    fontSize: tlSize(k),
+                    fontWeight: 400,
+                    color: TEXT,
+                    lineHeight: 1.4,
+                    display: "block",
+                    lineClamp: 4,
+                    overflow: "hidden",
+                  }}
+                >
+                  {timeLine}
+                </div>
               </div>
             )}
           </div>
@@ -321,7 +340,7 @@ export async function GET(req: Request, { params }: Params) {
               alignItems: "center",
               gap: 24,
               background: ACCENT_SOFT,
-              border: `2px solid ${ACCENT_TRACK}`,
+              border: `2px solid ${QR_BORDER}`,
               borderRadius: 20,
               padding: 20,
             }}
@@ -357,6 +376,7 @@ export async function GET(req: Request, { params }: Params) {
                   fontWeight: 700,
                   color: ACCENT_INK,
                   lineHeight: 1.3,
+                  textWrap: "balance",
                 }}
               >
                 Quét mã để nghe giọng đọc &amp; xem chi tiết
