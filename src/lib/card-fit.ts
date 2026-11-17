@@ -7,7 +7,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import opentype from "opentype.js";
+import { parse, type Font } from "opentype.js";
 
 type Weight = 400 | 500 | 700;
 type Parts = { title: string; summary?: string | null; timeLine?: string | null };
@@ -20,15 +20,15 @@ const FILES: Record<Weight, string> = {
 };
 
 // shortcut: module-level cache, resets on cold start only
-let fontsPromise: Promise<Record<Weight, opentype.Font>> | null = null;
+let fontsPromise: Promise<Record<Weight, Font>> | null = null;
 
 function loadFitFonts() {
   if (!fontsPromise) {
     fontsPromise = (async () => {
-      const out = {} as Record<Weight, opentype.Font>;
+      const out = {} as Record<Weight, Font>;
       for (const w of [400, 500, 700] as const) {
         const buf = await readFile(path.join(FONT_DIR, FILES[w]));
-        out[w] = opentype.parse(
+        out[w] = parse(
           buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength),
         );
       }
@@ -38,7 +38,7 @@ function loadFitFonts() {
   return fontsPromise;
 }
 
-function advance(font: opentype.Font, text: string, fontSize: number): number {
+function advance(font: Font, text: string, fontSize: number): number {
   try {
     return font.getAdvanceWidth(text, fontSize);
   } catch {
@@ -53,7 +53,7 @@ function advance(font: opentype.Font, text: string, fontSize: number): number {
 
 /** Greedy word wrap; returns line count (CSS: trailing spaces don't count at breaks). */
 export function wrapLines(
-  font: opentype.Font,
+  font: Font,
   text: string,
   fontSize: number,
   width: number,

@@ -1,7 +1,7 @@
 import { fitScale, topHeight, wrapLines, FIT } from "../src/lib/card-fit";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import opentype from "opentype.js";
+import { parse } from "opentype.js";
 
 async function main() {
   let failed = 0;
@@ -13,7 +13,7 @@ async function main() {
   };
 
   const buf = await readFile(path.join(process.cwd(), "fonts", "BeVietnamPro-Regular.ttf"));
-  const font = opentype.parse(
+  const font = parse(
     buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength),
   );
 
