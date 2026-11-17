@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx scripts/check-intent.ts",
+    "test": "tsx scripts/check-intent.ts && tsx scripts/check-card-fit.ts",
     "seed:procedures": "tsx scripts/seed-procedures.ts",
     "seed:announcements": "tsx scripts/seed-announcements.ts",
     "embed:procedures": "tsx scripts/embed-procedures.ts",
@@ -23,12 +23,14 @@
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.0",
     "next": "16.4.6",
+    "opentype.js": "^2.0.0",
     "qrcode": "^1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/opentype.js": "^1.3.10",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",

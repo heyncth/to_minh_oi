@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import QRCode from "qrcode";
 import { getPublishedAnnouncement, siteUrl } from "@/lib/announcements";
+import { fitScale } from "@/lib/card-fit";
 import { formatDate } from "@/lib/format";
 
 type Params = { params: Promise<{ id: string }> };
@@ -211,6 +212,13 @@ export async function GET(req: Request, { params }: Params) {
     const summary = item.summary_main;
     const timeLine = item.summary_time_location;
 
+    // Fill leftover height: scale title/body until the top block meets the QR
+    // row (space-between otherwise leaves a hole). QR stays fixed.
+    const k = await fitScale({ title: item.title, summary, timeLine });
+    const titleFs = Math.round(44 * k);
+    const summaryFs = Math.round(26 * k);
+    const timeFs = Math.round(24 * k);
+
     body = (
       <div
         style={{
@@ -259,7 +267,7 @@ export async function GET(req: Request, { params }: Params) {
             <div
               style={{
                 marginTop: 16,
-                fontSize: 44,
+                fontSize: titleFs,
                 fontWeight: 700,
                 color: TEXT,
                 lineHeight: 1.25,
@@ -278,7 +286,7 @@ export async function GET(req: Request, { params }: Params) {
             {summary && (
               <div
                 style={{
-                  fontSize: 26,
+                  fontSize: summaryFs,
                   color: SUMMARY,
                   lineHeight: 1.45,
                   display: "block",
@@ -292,7 +300,7 @@ export async function GET(req: Request, { params }: Params) {
               <div
                 style={{
                   marginTop: 16,
-                  fontSize: 24,
+                  fontSize: timeFs,
                   fontWeight: 500,
                   color: ACCENT_INK,
                   lineHeight: 1.4,
