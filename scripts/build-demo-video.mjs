@@ -30,6 +30,9 @@ const PANEL_X = 650;
 const SCENES = [
   {
     id: "scene1",
+    // The recorder starts before the scene's own setContent, so the first
+    // ~0.8s is the live site flashing past the QR poster — cut past it.
+    trimStart: 1.15,
     title: "Bảng tin rõ ràng, chữ to dễ đọc",
     text: "Ở các tổ dân phố, thông báo quan trọng trên nhóm Zalo thường trôi rất nhanh và chữ nhỏ, khiến cô chú lớn tuổi khó theo dõi. Với Tổ Mình Ơi, bà con chỉ cần một chạm quét mã QR là mở ngay bảng tin số của tổ, không cần tải ứng dụng hay đăng ký tài khoản, hỗ trợ phóng to chữ rõ nét chỉ bằng một nút bấm.",
   },
@@ -84,25 +87,29 @@ async function makeBezel(path) {
   await sharp(Buffer.from(svg)).png().toFile(path);
 }
 
-function drawtext(file, { font, size, color, x, y, spacing = 0 }) {
+function drawtext(file, { font, size, color, x, y, spacing = 0, alpha }) {
   // filter-graph args cannot hold Windows absolute paths (':' + '\\') — use repo-relative
   const tf = relative(ROOT, file).replace(/\\/g, "/");
-  return `drawtext=fontfile=${font}:textfile=${tf}:fontsize=${size}:fontcolor=${color}:x=${x}:y=${y}:line_spacing=${spacing}:reload=1`;
+  const alphaArg = alpha ? `:alpha=${alpha}` : "";
+  return `drawtext=fontfile=${font}:textfile=${tf}:fontsize=${size}:fontcolor=${color}:x=${x}:y=${y}:line_spacing=${spacing}:reload=1${alphaArg}`;
 }
 
-function composeScene({ clip, audio, titleFile, subFile, bezel, duration, out }) {
+function composeScene({ clip, audio, titleFile, subFile, bezel, duration, trimStart = 0, out }) {
   const title = titleFile;
   const sub = subFile;
   const fontBold = "fonts/BeVietnamPro-Bold.ttf";
   const fontReg = "fonts/BeVietnamPro-Regular.ttf";
+  // Panel text lands with the scene instead of being there before it cuts in.
+  const fadeIn = "'if(lt(t,0.4),t/0.4,1)'";
+  const trim = trimStart > 0 ? `trim=start=${trimStart},setpts=PTS-STARTPTS,` : "";
   const fc = [
-    `[0:v]scale=${PHONE_W}:${PHONE_H}:flags=lanczos,setsar=1,fps=30,format=yuv420p[ph]`,
+    `[0:v]${trim}scale=${PHONE_W}:${PHONE_H}:flags=lanczos,setsar=1,fps=30,format=yuv420p[ph]`,
     `color=c=0xF4F7FB:s=${W}x${H}:r=30:d=9999,format=yuv420p[bg]`,
     [
       `[bg][ph]overlay=${PHONE_X}:${PHONE_Y}`,
       `drawbox=x=${PANEL_X}:y=278:w=140:h=10:color=0x0B5CAB:t=fill`,
-      drawtext(title, { font: fontBold, size: 72, color: "0x0F172A", x: PANEL_X, y: 330 }),
-      drawtext(sub, { font: fontReg, size: 40, color: "0x334155", x: PANEL_X, y: 470, spacing: 14 }) + "[vtext]",
+      drawtext(title, { font: fontBold, size: 72, color: "0x0F172A", x: PANEL_X, y: 330, alpha: fadeIn }),
+      drawtext(sub, { font: fontReg, size: 40, color: "0x334155", x: PANEL_X, y: 470, spacing: 14, alpha: fadeIn }) + "[vtext]",
     ].join(","),
     `[vtext][1:v]overlay=${PHONE_X - 8}:${PHONE_Y - 8},format=yuv420p,trim=0:${duration},setpts=PTS-STARTPTS[v]`,
     `[2:a]aresample=48000,apad,atrim=0:${duration},asetpts=PTS-STARTPTS[a]`,
@@ -192,16 +199,17 @@ async function main() {
   for (const scene of SCENES) {
     const clip = join(CLIPS, `${scene.id}.mp4`);
     const audio = `${scene.id}.mp3`;
+    const trimStart = scene.trimStart ?? 0;
     const v = Number(ffprobe(clip));
     const a = Number(ffprobe(join(AUDIO, audio)));
-    const duration = Math.max(v, a);
+    const duration = Math.max(v - trimStart, a);
     const titleFile = join(TXT, `${scene.id}-title.txt`);
     const subFile = join(TXT, `${scene.id}-sub.txt`);
     writeFileSync(titleFile, scene.title);
     writeFileSync(subFile, wrap(scene.text, 52));
     const out = join(TMP, `${scene.id}.mp4`);
     console.log(`${scene.id}: video ${v.toFixed(2)}s audio ${a.toFixed(2)}s -> ${duration.toFixed(2)}s`);
-    composeScene({ clip, audio, titleFile, subFile, bezel, duration, out });
+    composeScene({ clip, audio, titleFile, subFile, bezel, duration, trimStart, out });
     parts.push(out);
   }
 
@@ -218,11 +226,15 @@ async function main() {
   composeOutro({ outroDur: oDur, audio: "scene5.mp3", duration: d5, out: out5 });
   parts.push(out5);
 
-  const list = join(TMP, "concat.txt");
-  writeFileSync(list, parts.map((p) => `file '${p.replace(/\\/g, "/")}'`).join("\n"));
+  // Hard cut between scenes — the inherited cursor carries the seam.
+  const listFile = join(TMP, "parts.txt");
+  writeFileSync(
+    listFile,
+    parts.map((p) => `file '${p.replace(/\\/g, "/")}'`).join("\n"),
+  );
   execFileSync(
     "ffmpeg",
-    ["-y", "-f", "concat", "-safe", "0", "-i", list, "-c", "copy", OUT],
+    ["-y", "-f", "concat", "-safe", "0", "-i", listFile, "-c", "copy", OUT],
     { stdio: ["ignore", "ignore", "inherit"] },
   );
 
